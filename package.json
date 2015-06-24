@@ -19,6 +19,12 @@
     "gulp-imagemin": "^2.2.1",
     "gulp-rename": "^1.2.2",
     "gulp-watch": "^4.2.4",
+    "gulp-webpack": "^1.5.0",
+    "jsx-loader": "^0.13.2",
+    "rimraf": "^2.4.0",
     "run-sequence": "^1.1.0"
+  },
+  "dependencies": {
+    "react": "^0.13.3"
   }
 }

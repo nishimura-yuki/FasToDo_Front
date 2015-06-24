@@ -20,3 +20,12 @@ body {
     margin: 0 auto 0 auto;
 }
 
+.show_block{
+    display:block; 
+}
+.show_inline{
+    display:inline;
+}
+.hidden{
+    display:none;
+}
