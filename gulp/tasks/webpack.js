@@ -7,7 +7,7 @@ var appConfig = config.config;
 var webpackConfig = config.task.webpack;
 
 gulp.task('webpack', function () {
-    gulp.src('')
+    gulp.src(appConfig.src)
         .pipe(webpack(webpackConfig))
         .pipe(gulpif(appConfig.js.uglify, uglify()))
         .pipe(gulp.dest(appConfig.js.dest));

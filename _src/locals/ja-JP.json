@@ -1,0 +1,68 @@
+{
+    "signup":{
+        "welcome":"FasToDoへようこそ！",
+        "describe":"登録",
+        "userid":"メールアドレス",
+        "password":"パスワード",
+        "password_placeholder":"パスワード入力",
+        "show":"表示",
+        "language":"言語",
+        "timezone":"タイムゾーン",
+        "signup":"登録"
+    },
+    "login":{
+        "header": "FasToDo",
+        "message": "ログイン",
+        "userid": "メールアドレス",
+        "password": "パスワード",
+        "password_placeholder":"パスワード入力",
+        "show":"表示",
+        "login":"ログイン",
+        "to_signup": "アカウントをお持ちでない場合、こちらからサインアップしてください",
+        "signup": "サインアップ"
+    },
+    "app":{
+        "today":"今日",
+        "tomorrow":"明日",
+        "anytime":"いつか",
+        "past":"未完了",
+        "add":"追加",
+        "save":"保存",
+        "cancel":"キャンセル",
+        "close":"閉じる",
+        "delete":"削除",
+        "edit":"編集",
+        "empty_select":"-未選択-",
+        "task_title":"タスク名",
+        "task_date":"スケジュール",
+        "folder_name":"フォルダ名",
+        "not_found":"ページが見つかりません",
+        "language":"言語",
+        "timezone":"タイムゾーン",
+        "settings":"設定",
+        "logout":"ログアウト"
+    },
+
+
+    "error":{
+        "required":"%s は必須入力です",
+        "already_exist":"すでに同じメールアドレスが登録されています",
+        "login_invalid":"ログイン情報が正しくありません",
+        "userid":"メールアドレス形式が正しくありません",
+        "password":"パスワードは半角英数記号8〜16文字で入力してください",
+        "date":"日付は YYYY/MM/DD の形式で入力してください",
+        "limit_task_per_folder":"１つのフォルダに格納できるタスクは %d個までです",
+        "limit_task_per_date":"１日に登録できるタスクは %d個までです",
+        "limit_folder":"作成可能なフォルダ数は %d個です"
+    },
+
+    "lang":{
+        "en-US":"英語",
+        "ja-JP":"日本語"
+    },
+    "timezone":{
+        "Australia/Sydney":"ｵｰｽﾄﾗﾘｱ ｼﾄﾞﾆｰ",
+        "Asia/Tokyo":"日本 東京"
+    }
+
+}

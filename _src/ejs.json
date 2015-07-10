@@ -1,9 +1,9 @@
 {
-    "pageTitle": "FasToDo", 
     "app_env":{
         "timezone": { 
             "name": "Australia/Sydney",
             "offset": 600 
         }
-    }
+    },
+    "message": "Error Message"
 }

@@ -32,7 +32,7 @@ DateCalculator.prototype.getDate = function( add ){
 }
 
 DateCalculator.getDateFormat = function( d ){
-    return d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate(); 
+    return d.getFullYear() + "/" + ("00" + (d.getMonth()+1)).substr(-2) + "/" + ("00" + d.getDate()).substr(-2); 
 }
 
 //== private

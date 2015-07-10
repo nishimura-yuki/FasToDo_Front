@@ -19,7 +19,8 @@ module.exports = {
                     ReactIntl: 'react-intl',
                     Request: absoluteSrcPath +'/javascripts/util/request.js',
                     ReactRouter: 'react-router',
-                    Define: absoluteSrcPath + '/define/development.json'
+                    Define: absoluteSrcPath + '/define/development.json',
+                    Messages: absoluteSrcPath + '/javascripts/util/locals.js'
                 })
             ]
         },

@@ -1,0 +1,67 @@
+{
+    "signup":{
+        "welcome":"Welcome to FasToDo !",
+        "describe":"Sign up for free",
+        "userid":"Email",
+        "password":"Password",
+        "password_placeholder":"your password here",
+        "show":"show",
+        "language":"Language",
+        "timezone":"Timezone",
+        "signup":"Sign up"
+    },
+    "login":{
+        "header": "FasToDo",
+        "message": "Login",
+        "userid": "Email",
+        "password": "Password",
+        "password_placeholder":"your password here",
+        "show":"show",
+        "login":"Login",
+        "to_signup": "If you don't register, Please sign up here!",
+        "signup": "Signup"
+    },
+    "app":{
+        "today":"Today",
+        "tomorrow":"Tomorrow",
+        "anytime":"Anytime",
+        "past":"Past",
+        "add":"Add",
+        "save":"Save",
+        "cancel":"Cancel",
+        "close":"Close",
+        "delete":"Delete",
+        "edit":"Edit",
+        "empty_select":"-Unselected-",
+        "task_title":"TaskName",
+        "task_date":"TaskSchedule",
+        "folder_name":"FolderName",
+        "not_found":"Not Found",
+        "language":"Language",
+        "timezone":"Timezone",
+        "settings":"Settings",
+        "logout":"Logout"
+    },
+
+    "error":{
+        "required":"%s is required",
+        "already_exist":"The email is already registered",
+        "login_invalid":"Email or Password is not correct",
+        "userid":"Invalid Email format",
+        "password":"Password must be letters of between 8 and 16",
+        "date":"Date format must be YYYY/MM/DD",
+        "limit_task_per_folder":"The folder already has %d tasks",
+        "limit_task_per_date":"The date already has %d tasks",
+        "limit_folder":"There is already %d folders"
+    },
+
+    "lang":{
+        "en-US":"English",
+        "ja-JP":"Japanese"
+    },
+    "timezone":{
+        "Australia/Sydney":"Australia/Sydney",
+        "Asia/Tokyo":"Japan/Tokyo"
+    }
+
+}

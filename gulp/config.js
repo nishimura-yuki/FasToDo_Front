@@ -10,7 +10,7 @@ if(env == null){
 }
 
 var src = './_src';  // ソースディレクトリ
-var dest = './dest'; // 出力先ディレクトリ
+var dest = '../app/public'; // 出力先ディレクトリ
 var relativeSrcPath = path.relative('.', src);
 var absoluteSrcPath = path.resolve(src);
 
@@ -36,9 +36,9 @@ var c = {
         
         copy: {
             src: [
-                src + '/html/**/*.html'
+                src + '/{,**/}*.ejs'
             ],
-            dest: dest
+            dest: '../app/views' 
         },
         imagemin: {
             src: src + '/images/**/*.+(jpg|jpeg|png|gif|svg)',
@@ -49,6 +49,8 @@ var c = {
         webpack: {
             entry: {
                 app: src + '/javascripts/app.jsx',
+                signup: src + '/javascripts/signup.jsx',
+                login: src + '/javascripts/login.jsx',
             },
             output: {
                 filename: "[name].js"
@@ -84,14 +86,13 @@ var c = {
             */
         },
         watch: {
-            webpack: relativeSrcPath + '/+(javascripts|stylesheets|locals|settings)/*{,**/}*.*',
-            html: relativeSrcPath + '/{,**/}*.html',
-            img: relativeSrcPath + '/images/*.*' ,
-            ejs: relativeSrcPath + '/{,**/}*.ejs'
+            webpack: relativeSrcPath + '/+(javascripts|stylesheets|locals|settings)/**/*.*',
+            img: relativeSrcPath + '/images/*.*',
+            ejs: relativeSrcPath + '/**/*.ejs'
         },
         ejs: {
             src: src + '/{,**/}*.ejs',
-            dest: dest ,
+            dest: './dest' ,
             config: src + '/ejs.json'
         }
 

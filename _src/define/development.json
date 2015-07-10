@@ -1,3 +1,8 @@
 {
-    "api_host": "http://192.168.33.10:3000"
+    "api_host": "http://192.168.33.10:3000",
+    "number_of_limit":{
+        "task_per_date":3,
+        "task_per_folder":3,
+        "folder":3
+    }
 }

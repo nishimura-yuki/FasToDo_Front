@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var watch = require("gulp-watch");
 var config = require('../config').task.watch;
 
 gulp.task('watch', function () {
@@ -9,12 +10,22 @@ gulp.task('watch', function () {
     gulp.watch(config.webpack,
         ['webpack']
     );
-
+   /*
+    watch(config.webpack, function () {
+        gulp.task("webpack");
+    });
+   */ 
     // copy
-    gulp.watch(config.html,
+    gulp.watch(config.ejs,
         ['copy']
     );
-
+   /*
+    watch(config.ejs, function () {
+        gulp.task("copy");
+    });
+    */
+ 
+/*
     // img
     gulp.watch(config.img, 
         ['imagemin']
@@ -24,5 +35,5 @@ gulp.task('watch', function () {
     gulp.watch(config.ejs, 
         ['ejs']
     );
-
+*/
 });

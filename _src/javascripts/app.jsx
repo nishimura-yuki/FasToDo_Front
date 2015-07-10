@@ -1,21 +1,18 @@
  
 // load css
+require("../stylesheets/reset.css");
 require("../stylesheets/base.css");
 require("../stylesheets/app.css");
 
 // load module
 var Route = ReactRouter.Route;
-var Header = require("./view/app/header.jsx");
-var Content = require("./view/app/content.jsx");
+var Body = require("./view/app_body.jsx");
 
 console.log(AppEnv);
 var App =  React.createClass({
     render: function(){
         return (
-            <div className="wrapper">
-                <Header env={AppEnv} />
-                <Content env={AppEnv} />
-            </div> 
+           <Body env={AppEnv} />
         )
     }
 });

@@ -5,7 +5,8 @@ var config = require('../config').config;
 
 gulp.task('clean-dist', function () {
     gulp.src([
-        config.dest + '/{,**/}*.html', // 対象ファイル
+        config.dest + '/{,**/}*.html',
+        config.dest + '/{,**/}*.ejs',
         config.dest + '/stylesheets',
         config.dest + '/javascripts',
         config.dest + '/images'

@@ -1,0 +1,8 @@
+{
+    "api_host": "https://fastodo.herokuapp.com",
+    "number_of_limit":{
+        "task_per_date":100,
+        "task_per_folder":100,
+        "folder":10
+    }
+}

@@ -1,0 +1,128 @@
+
+/* Body */
+.wrapper, #wrapper{
+    width:960px;
+    height:100%;
+    margin: 0 auto 0 auto;
+}
+
+/* Header */
+.header{
+    height: 75px;
+    background-color:#36B35D;
+}
+
+.header > p{
+    font-size:36px;
+    text-align:center;
+    padding-top: 10px;
+}
+
+/* Content */
+
+.p_input_text{
+    width: 250px;
+    padding: 4px 8px 4px 8px;
+    height: 30px; 
+    font-size:18px;
+}
+.p_input_button{
+    width: 270px;
+    height: 30px; 
+    font-size:18px;
+    background-color: #3D64CD;
+    color: #C4CADA;
+    border-style:none;
+    border-radius:2px;
+}
+.p_input_button:hover{
+    background-color: #5C81E6;
+    color: #f3f3f3;
+}
+.p_input_button:active{
+    background-color: #4472E5;
+    color: #BFBFBF;
+}
+.p_input_button[disabled]{
+    background-color: #5C81E6;
+    color: #f3f3f3;
+}
+
+.p_error-message{
+    font-size:14px;
+    color:#D82020;
+}
+
+.content{
+    height:100%;
+    background-color:#36B35D;
+}
+
+.c_sideline{
+    width: 620px;
+    border-top:1px dotted #000000;
+    padding: 10px 0 10px 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.c_loginmessage{
+    font-size:24px;
+    text-align:center;
+    padding: 10px 0 40px 0;
+}
+
+.c_form{
+    margin-left:auto;
+    margin-right:auto;
+    width: 270px;
+}
+.c_form p{
+    font-size:18px;
+}
+.c_table tr {
+    height: 90px;
+}
+
+.c_password-text{
+    overflow:hidden;
+}
+.c_password-text_message{
+    float:left;
+    margin-right: 10px;
+}
+.c_showpass{
+    font-size:12px;
+    text-align:center;
+    width: 50px;
+    height: 18px;
+    background-color:#d8d8d8;
+    color:#111111;
+    border-radius: 2px;
+    float:left;
+    margin: 6px 5px 3px 0;
+    vertical-align:middle;
+}
+.c_showpass:hover{
+    cursor:pointer;
+    background-color:#727272;
+    color:#E5E5E5;
+}
+.c_showpass_on{
+    background-color:#727272;
+    color:#E5E5E5;
+}
+
+.c_signup_nav{
+    overflow:hidden;
+    display:table;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.c_signup_nav p{
+    text-align:center;
+}
+.c_signup_nav a{
+    float:right;
+}

@@ -11,7 +11,6 @@ body {
 	padding: 0;
     height:100%;
 	background-color: #5AB376;
-    outline:1px solid blue;
 }
 .show_block{
     display:block; 
@@ -21,6 +20,30 @@ body {
 }
 .hidden{
     display:none;
+}
+.v-middle{
+    vertical-align:middle;
+}
+.a-center{
+    text-align:center;
+}
+.a-left{
+    text-align:left;
+}
+.a-right{
+    text-align:right;
+}
+.relative{
+    position:relative;
+}
+
+.popup{
+    position:absolute;
+    background-color: #DFDFDF;
+    border-style:none;
+    box-shadow: 5px 5px 5px rgba(0,0,0,0.4);
+    border-radius:4px;
+    overflow:hidden;
 }
 
 .loading{
