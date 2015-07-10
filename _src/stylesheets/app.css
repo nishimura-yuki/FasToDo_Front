@@ -489,6 +489,21 @@
     overflow:hidden;
 }
 
+.task-list-active_date{
+    width:580px;
+}
+
+.task-list-active-date_title{
+    text-align: center;    
+    margin-bottom: 20px;
+}
+
+.task-list-active-date_list{
+}
+.task-list-active-date-list_drag{
+    background-color: rgba(255,255,255,0.2);
+}
+
 .task-add a:hover{
     color: #4d4d4d; 
 }
@@ -574,6 +589,11 @@
 .activetask{
     margin: 10px 0 0 10px;
     width:560px;
+}
+.activetask-drop{
+    width:570px;
+    height:30px;
+    background-color: #fff;
 }
 .activetask img:hover{
     opacity:0.6;
@@ -674,9 +694,11 @@
     color:#D82020;
     margin-left:68px;
 }
+
 .activetask_dragging{
     background-color: #ffffff;
     opacity:0.5;
+    position:absolute;
 }
 
 
