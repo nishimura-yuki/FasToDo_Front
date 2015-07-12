@@ -25,7 +25,7 @@ var AppData = {
         anytime: {
                 name:"Anytime" , count: 30,
                 ids: [ {id:"01",orderid:0} , {id:"05",orderid:1} , {id:"07", orderid:2} ]
-        },
+        })
         past: {
                 name: "Past", count: 30,
                 ids: [ {id:"01",orderid:0} , {id:"05",orderid:1} , {id:"07", orderid:2} ,
@@ -72,7 +72,7 @@ module.exports = React.createClass({
         data: this._init_data ,
         loaded: false, loading:false,
         reset: false, 
-        dragging: false
+        taskdragging: null 
     },
     getInitialState: function () {
         return this._init_state;
@@ -155,7 +155,7 @@ module.exports = React.createClass({
                         var f = appData.folders[i];
                         var ids = mapOrder[f.folderid];
                         for( var j=0; j<ids.length; j++ ){
-                            _this.refreshFolderOrder( f,
+                            _this.refreshFolderOrderAdd( f,
                                                      {taskid:  ids[j].id ,
                                                       orderid: ids[j].orderid
                                                      },
@@ -164,6 +164,7 @@ module.exports = React.createClass({
                     } 
 
                     console.log("finish loadContent");
+                    _this.refreshOrder( appData );
                     _this.setState( {data:appData , loaded:true, loading:false } ); 
 
                })
@@ -187,7 +188,7 @@ module.exports = React.createClass({
                         var folder = null;
                         for(var i=0;i<appData.folders.length;i++){
                              if(data.folderid == appData.folders[i].folderid){
-                                _this.refreshFolderOrder( appData.folders[i],
+                                _this.refreshFolderOrderAdd( appData.folders[i],
                                                           {taskid: resData.task.taskid ,
                                                            orderid: resData.folderorderid
                                                           },
@@ -270,12 +271,15 @@ module.exports = React.createClass({
         var _this = this;
         Request.del( Define.api_host + "/api/task/" + id)
                .end(function(err, res){
+                    console.log(err);
                     console.log(res.body);
-                    var appData = _this.state.data;
-                    _this.refreshTaskDelete( appData, task );
-                    _this.refreshRemoveTaskFromFolder( appData.folders, task );
-                    _this.setState( {data:appData} );
                 });
+
+        var appData = this.state.data;
+        this.refreshTaskDelete( appData, task );
+        this.refreshRemoveTaskFromFolder( appData.folders, task );
+        this.setState( {data:appData} );
+
     },
     taskDone:function(id){
         console.log("done: " + id);
@@ -284,11 +288,14 @@ module.exports = React.createClass({
         var _this = this;
         Request.put( Define.api_host + "/api/task/done/" + id)
                .end(function(err, res){
+                    console.log(err);
                     console.log(res.body);
-                    var appData = _this.state.data;
-                    _this.refreshTaskDone(appData, id);
-                    _this.setState( {data:appData} );
                });
+
+        var appData = this.state.data;
+        this.refreshTaskDone(appData, id);
+        this.setState( {data:appData} );
+
     }, 
     taskActive:function(id){
         console.log("active: " + id);
@@ -297,22 +304,56 @@ module.exports = React.createClass({
         var _this = this;
         Request.put( Define.api_host + "/api/task/active/" + id)
                .end(function(err, res){
+                    console.log(err);
                     console.log(res.body);
-                    var appData = _this.state.data;
-                    _this.refreshTaskActive(appData, id);
-                    _this.setState( {data:appData} );
                });   
-    },
-    taskDrag:function(id, pos, diff){
-        console.log("task drag: "+ id);
-        this.setState( {dragging:{ type:"task", 
-                                   id:id, 
-                                   pos:{x:pos.x,y:pos.y} ,
-                                   diff:{x:diff.x, y:diff.y}
-                        }});
-    
-    },
+        
+        var appData = this.state.data;
+        this.refreshTaskActive(appData, id);
+        this.setState( {data:appData} );
 
+    },
+    taskOrderForDate:function(id, beforeid){
+        var task = this.state.data.tasks[id];
+        if(!task) return;
+        if( beforeid != "top" ){
+            var taskDate = task.date;
+            task = this.state.data.tasks[beforeid];
+            if(!task || task.date != taskDate) return;
+        }
+
+        Request.put( Define.api_host + "/api/task/order/" + id)
+               .send({ type: "date", before:beforeid })
+               .end(function(err, res){
+                    console.log(err);
+                    console.log(res.body);
+        });     
+
+        var appData = this.state.data;
+        this.refreshTaskOrderForDate(appData, id, beforeid);
+        this.setState( {data:appData, taskdragging:null});
+
+    },
+    taskOrderForFolder:function(id, beforeid){
+        var task = this.state.data.tasks[id];
+        if(!task) return;
+        if( beforeid != "top" ){
+            var taskFolder = task.folderid;
+            task = this.state.data.tasks[beforeid];
+            if(!task || task.folderid != taskFolder) return;
+        }
+        Request.put( Define.api_host + "/api/task/order/" + id)
+               .send({ type: "folder", before:beforeid })
+               .end(function(err, res){
+                    console.log(err);
+                    console.log(res.body);
+        });     
+
+        var appData = this.state.data;
+        this.refreshTaskOrderForFolder(appData, id, beforeid);
+        this.setState( {data:appData, taskdragging:null});
+
+    },
     folderAdd: function(data){
         console.log(data);
         var _this = this;
@@ -387,12 +428,10 @@ module.exports = React.createClass({
             }
         }
         console.log(newFolder);
+        this.refreshRemoveTaskFromFolder( appData.folders, prevTask );
         if(newFolder){
-            this.refreshRemoveTaskFromFolder( appData.folders, prevTask );
-            this.refreshFolderOrder(newFolder.folder, newFolder.folderorder, appData.tasks);
-        }else{
-            this.refreshRemoveTaskFromFolder( appData.folders, prevTask );
-        } 
+            this.refreshFolderOrderAdd(newFolder.folder, newFolder.folderorder, appData.tasks);
+        }
     },
     refreshTaskDelete:function( appData, task ){
         //tasks から削除
@@ -432,7 +471,7 @@ module.exports = React.createClass({
         folder.ids = [];
         folders.push( folder );
     },
-    refreshFolderOrder:function(folder, folderOrder, tasks){
+    refreshFolderOrderAdd:function(folder, folderOrder, tasks){
         folder.ids.push({
                         id: folderOrder.taskid,
                         orderid: folderOrder.orderid
@@ -484,6 +523,88 @@ module.exports = React.createClass({
         }
         appData.folders.splice(indx, 1); 
     },
+    refreshTaskOrderForDate: function(appData, id, beforeid){
+        var task = appData.tasks[id];
+        var beforeOrder = -1;
+        if(beforeid != "top"){
+            beforeOrder = appData.tasks[beforeid].orderid;
+        }
+        var dateInfo = this.getDateInfo(appData.days, task.date);
+        var ids = dateInfo.day.ids;
+        console.log(ids);
+        for(var i=0;i<ids.length; i++){
+            var t = appData.tasks[ids[i].id];
+            if(t.taskid == task.taskid){
+                ids[i].orderid = (beforeOrder+1); 
+                t.orderid = ids[i].orderid;
+            }else{
+                if(t.date == task.date){
+                    if(ids[i].orderid > beforeOrder){
+                        ids[i].orderid++;
+                        t.orderid = ids[i].orderid;
+                    } 
+                }
+            }
+        }
+
+        console.log(ids);
+        this.refreshDateOrder( appData.days );
+    },
+    refreshTaskOrderForFolder: function(appData, id, beforeid){
+        var task = appData.tasks[id];
+        var folder = this.getFolderInfo(appData.folders, task.folderid);
+        var beforeOrder = -1;
+        var ids = folder.ids;
+        if(beforeid != "top"){
+            for(var i=0;i<ids.length;i++){
+                if(ids[i].id == beforeid){
+                    beforeOrder = ids[i].orderid;
+                    break;
+                } 
+            }
+        }
+        console.log(ids);
+        for(var i=0;i<ids.length; i++){
+            var t = appData.tasks[ids[i].id];
+            if(t.taskid == task.taskid){
+                ids[i].orderid = (beforeOrder+1); 
+            }else{
+                if(ids[i].orderid > beforeOrder){
+                    ids[i].orderid++;
+                } 
+            }
+        }
+        console.log(ids);
+        this.refreshOrderFolderOrder( appData.folders );
+    },
+
+    refreshOrder:function( appData ){
+        this.refreshDateOrder( appData.days );
+        this.refreshFolderOrder( appData.folders );
+        this.refreshOrderFolderOrder( appData.folders );
+    },
+    refreshDateOrder: function(days){
+        days.today.ids.sort( this.sort );
+        days.tomorrow.ids.sort( this.sort );
+        days.past.ids.sort( this.sort );
+        days.anytime.ids.sort( this.sort );
+    },
+    refreshFolderOrder: function(folders){
+        folders.sort( this.sort ); 
+    },
+    refreshOrderFolderOrder: function(folders){
+        for(var i=0;i<folders.length;i++){
+            folders[i].ids.sort( this.sort ); 
+        } 
+    },
+
+    /* data refresh **/
+    sort: function(a, b){
+        if(a.orderid < b.orderid) return -1;
+        if(a.orderid > b.orderid) return 1;
+        return 0;
+    },
+
     getDateInfo:function( days, date ){
         var day= {};
         if( date == this.props.dates.today){
@@ -530,25 +651,14 @@ module.exports = React.createClass({
             console.log(ids);
         }
     },
-    /* data refresh **/
 
-    _onMouseMove: function(event){
-        if(this.state.dragging){
-            var d = this.state.dragging;
-            d.pos.x = event.pageX - d.diff.x;
-            d.pos.y = event.pageY - d.diff.y;
-            this.setState({ dragging: d });
-        }
+    taskDrag:function(id){
+        console.log("task drag: "+ id);
+        this.setState( {taskdragging:id });
     },
-    _onMouseUp: function(event){
-        console.log("mouse up");
-        if(this.state.dragging){
-            this.setState({ dragging: false });
-        }   
-    },
-    _onMouseLeave:function(event){
-        console.log("mouse leave");
-        this.setState({ dragging: false });
+    taskDrop:function(){
+        console.log("task drop ");
+        this.setState( {taskdragging:null });
     },
 
     render: function(){
@@ -564,14 +674,10 @@ module.exports = React.createClass({
             if( params.id ) state.id = params.id;
 
             return (
-                <div className="content" 
-                    onMouseMove={this._onMouseMove}
-                    onMouseUp={this._onMouseUp}
-                    onMouseLeave={this._onMouseLeave}
-                    >
+                <div className="content" >
                     <ContentMenu state={state}
                         reset={this.state.reset}
-                        drag={this.state.dragging}
+                        drag={this.state.taskdragging}
                         days={this.state.data.days}
                         folders={this.state.data.folders}
                         folderAdd={this.folderAdd}
@@ -580,7 +686,7 @@ module.exports = React.createClass({
                     />
                     <ContentMain state={state}
                         reset={this.state.reset}
-                        drag={this.state.dragging}
+                        drag={this.state.taskdragging}
                         days={this.state.data.days}
                         folders={this.state.data.folders}
                         tasks={this.state.data.tasks}
@@ -589,7 +695,10 @@ module.exports = React.createClass({
                         taskDelete={this.taskDelete}
                         taskActive={this.taskActive}
                         taskDone={this.taskDone}
+                        taskOrderForDate={this.taskOrderForDate}
+                        taskOrderForFolder={this.taskOrderForFolder}
                         taskDrag={this.taskDrag}
+                        taskDrop={this.taskDrop}
                     />
                 </div>        
             ) 

@@ -14,13 +14,15 @@ module.exports = React.createClass({
             type: React.PropTypes.string.isRequired,
             pos:  React.PropTypes.object
         }),
+        sub: React.PropTypes.string,
         onSave: React.PropTypes.func.isRequired,
         onDelete: React.PropTypes.func.isRequired,
         onDone: React.PropTypes.func.isRequired,
         onDrag: React.PropTypes.func.isRequired,
         onEdit: React.PropTypes.func.isRequired,
         onCancel: React.PropTypes.func.isRequired,
-        onDrop: React.PropTypes.func.isRequired
+        onDragOver: React.PropTypes.func.isRequired,
+        onDragEnd: React.PropTypes.func.isRequired
     },
     _init_state: { 
         title:"",
@@ -88,52 +90,24 @@ module.exports = React.createClass({
         this.setState({ folder: event.target.value });
     },
 
-    test: function(event){
-        console.log("eeee");
-        event.preventDefault();
-    },
-
     _onDragStart: function(event){
         console.log("drag start");
         var el = document.getElementById(this.getDOMId());
         el.className = el.className + " activetask_dragging";
+        console.log(this.props.data);
         event.dataTransfer.setData("task", this.props.data);
         event.dataTransfer.setDragImage( el, 14, 14);
         this.props.onDrag(this.props.data.taskid);
     },
-    _onDrag: function(event){
-        //this.props.onDrag(this.props.data.taskid);
-        console.log("drag");
-        //event.preventDefault();
+    _onDragEnd: function(event){
+        console.log("drag end");
+        this.props.onDragEnd();
     },
-    /*
-    _onDragMouseDown: function(event){
-        console.log("mouse down");
-        event.dataTransfer.setData("task", this.props.data);
-        //基準位置
-
-        var element = document.getElementById(this.getDOMId());
-        var rect = element.getBoundingClientRect();
-        baseTop = rect.top + window.pageYOffset - 10; //sub margin-top
-        baseLeft = rect.left + window.pageXOffset - 10; //sub margin-left
-        console.log(event.pageX);
-        console.log(event.pageY);
-        console.log(baseLeft);
-        console.log(baseTop);
-
-        this.props.onDrag(this.props.data.taskid,
-                          {x:baseLeft, y:baseTop},
-                          {x:event.pageX - baseLeft,
-                           y:event.pageY - baseTop});
-    },
-    */
     _onOverBefore: function(event){
-        console.log("over before??"); 
-        this.props.onDrop( this.props.data.taskid, "before" );
+        this.props.onDragOver( this.props.data.taskid, "before" );
     },
     _onOverAfter: function(event){
-        console.log("over after??"); 
-        this.props.onDrop( this.props.data.taskid, "after" );
+        this.props.onDragOver( this.props.data.taskid, "after" );
     },
 
     getDOMId: function(){
@@ -142,15 +116,17 @@ module.exports = React.createClass({
 
     render: function(){
         var mainClass = "";
-        var mainStyle = {};
         var classname = "";
         var editHidden = "";
         var showHidden = "";
+        var stayHidden = "";
         var errorTitle = "";
         var errorDate = "";
         var errorMesTitle = "";
         var errorMesDate = "";
         var errorMesFolder = "";
+        var subInfo = "";
+        var subHidden = "";
         var dropBefore = (<div key={"activetask-dropbefore_"+this.props.data.taskid}></div>);
         var dropAfter  = (<div key={"activetask-dropafter_"+this.props.data.taskid}></div>);
         if(this.props.show.type == "edit"){
@@ -171,19 +147,33 @@ module.exports = React.createClass({
             }
         }else{
             if(this.props.show.type == "drag"){
-                mainClass = "activetask_dragging"; 
-                mainStyle = {
-                    top:  this.props.show.pos.y,
-                    left: this.props.show.pos.x
-                };
+                mainClass = "activetask_dragging activetask_dragmotion"; 
             }else if(this.props.show.type == "drop"){
-                dropBefore = (<div className="activetask-drop" onDragOver={this._onOverBefore} 
+                mainClass = "activetask_dragmotion"; 
+                dropBefore = (<div className="activetask-drop-before" onDragEnter={this._onOverBefore} 
                               key={"activetask-dropbefore_"+this.props.data.taskid}></div>);
-                dropAfter = (<div className="activetask-drop" onMouseOver={this._onOverAfter} 
+                dropAfter = (<div className="activetask-drop-after" onDragEnter={this._onOverAfter} 
                               key={"activetask-dropafter_"+this.props.data.taskid}></div>);
+            }else if(this.props.show.type == "stay"){
+                stayHidden = "hidden"; 
             }
             classname = "activetask-unit_show";
             showHidden = "hidden";
+        }
+
+        if(this.props.sub == "date"){
+            subInfo = this.props.data.date; 
+        }else if( this.props.sub == "folder" ){
+            var folders = this.props.folders;
+            for(var i=0;i<folders.length; i++){
+                if( this.props.data.folderid == folders[i].folderid ){
+                    subInfo = folders[i].name; 
+                    break;
+                } 
+            }
+        }
+        if(subInfo.length <= 0){
+            subHidden = "hidden";
         }
 
         var folders = this.props.folders.map(function (f) {
@@ -193,62 +183,63 @@ module.exports = React.createClass({
         });
 
         return (
-            <div >
+            <div className={"activetask "+ mainClass} id={this.getDOMId()} >
                 {dropBefore}
-                <div className={"activetask "+ mainClass} id={this.getDOMId()} >
-                    <div className={"activetask_unit "+classname} >
-                        <div className={'activetask_buttons ' + showHidden}>
-                            <button className="task-save-button" type="button" onClick={this._onSave} name="save">{Messages.get("app").save}</button>
-                            <button className="task-cancel-button" type="button" onClick={this._onCancel} name="cancel">{Messages.get("app").cancel}</button>
-                        </div>  
-                        <div className="activetask_drag">
-                            <img className={editHidden} src="/images/list-icon.png" alt="" 
-                                 onDragStart={this._onDragStart}
-                                 onDrag={this._onDrag}
-                            /> 
+                {dropAfter}
+                <div className={"activetask_unit "+classname} >
+                    <div className={'activetask_buttons ' + showHidden}>
+                        <button className="task-save-button" type="button" onClick={this._onSave} name="save">{Messages.get("app").save}</button>
+                        <button className="task-cancel-button" type="button" onClick={this._onCancel} name="cancel">{Messages.get("app").cancel}</button>
+                    </div>  
+                    <div className="activetask_drag">
+                        <img className={editHidden + " " + stayHidden} src="/images/list-icon.png" alt="" 
+                             onDragStart={this._onDragStart}
+                             onDragEnd={this._onDragEnd}
+                        /> 
+                    </div>
+                    <div className="activetask_info" onClick={this._onEdit} >
+                        <div className="activetask-info_check" onClick={this._onDone}>
+                            <img className={editHidden} src="/images/check-icon.png" alt="" />
                         </div>
-                        <div className="activetask_info" onClick={this._onEdit} >
-                            <div className="activetask-info_check" onClick={this._onDone}>
-                                <img className={editHidden} src="/images/check-icon.png" alt="" />
-                            </div>
-                            <div className="activetask-info_title" >
-                                <div className={"activetask-info-title_show "+editHidden}>
-                                    <p>{this.state.title}</p>
-                                </div>
-                                <div className={"activetask-info_input " + showHidden} >
-                                    <div className="activetask-info-input_title" >
-                                        <input className={"task-title-input "+errorTitle} type="text" 
-                                               onChange={this._onChangeTitle} value={this.state.title}
-                                        />
-                                    </div>
-                                    <div className="activetask-info-input_date" >
-                                        <input className={"task-date-input "+errorDate} type="text" name="date" 
-                                            onChange={this._onChangeDate}
-                                            placeholder="yyyy/mm/dd" value={this.state.date} 
-                                        />
-                                    </div>
-                                    <div className="activetask-info-input_folder" >
-                                        <select className="task-folder-select" name="folder" ref="folder" 
-                                            onChange={this._onChangeFolder} value={this.state.folder} 
-                                        >
-                                            <option value="" >{Messages.get("app").empty_select}</option>
-                                            {folders}
-                                        </select>
-                                    </div>
+                        <div className="activetask-info_title" >
+                            <div className={"activetask-info-title_show "+editHidden}>
+                                <p>{this.state.title}</p>
+                                <div className={"activetask-info-title-show_sub "+subHidden}>
+                                    {subInfo}
                                 </div>
                             </div>
-                        </div>
-                        <div className={'activetask_bin ' + editHidden} >
-                            <img src="/images/bin-icon.png" alt="" onClick={this._onDelete}/>       
+                            <div className={"activetask-info_input " + showHidden} >
+                                <div className="activetask-info-input_title" >
+                                    <input className={"task-title-input "+errorTitle} type="text" 
+                                           onChange={this._onChangeTitle} value={this.state.title}
+                                    />
+                                </div>
+                                <div className="activetask-info-input_date" >
+                                    <input className={"task-date-input "+errorDate} type="text" name="date" 
+                                        onChange={this._onChangeDate}
+                                        placeholder="yyyy/mm/dd" value={this.state.date} 
+                                    />
+                                </div>
+                                <div className="activetask-info-input_folder" >
+                                    <select className="task-folder-select" name="folder" ref="folder" 
+                                        onChange={this._onChangeFolder} value={this.state.folder} 
+                                    >
+                                        <option value="" >{Messages.get("app").empty_select}</option>
+                                        {folders}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="activetask_error">
-                        <p>{errorMesTitle}</p>
-                        <p>{errorMesDate}</p>
-                        <p>{errorMesFolder}</p>
+                    <div className={'activetask_bin ' + editHidden} >
+                        <img src="/images/bin-icon.png" alt="" onClick={this._onDelete}/>       
                     </div>
                 </div>
-                {dropAfter}
+                <div className="activetask_error">
+                    <p>{errorMesTitle}</p>
+                    <p>{errorMesDate}</p>
+                    <p>{errorMesFolder}</p>
+                </div>
             </div>
         ) 
     }

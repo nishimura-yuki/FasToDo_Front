@@ -364,9 +364,13 @@
     margin-left:100px;
 }
 
+.folder-list{
+    padding: 5px 0 15px 15px;
+    margin-left:28px;
+}
 .folder-menu{
     height:33px;
-    margin: 20px 0 0 43px;
+    margin: 20px 0 0 0;
     overflow:hidden;
 }
 .folder-menu_sort{
@@ -495,10 +499,12 @@
 
 .task-list-active-date_title{
     text-align: center;    
-    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .task-list-active-date_list{
+    padding-top: 10px;
+    padding-bottom: 20px;
 }
 .task-list-active-date-list_drag{
     background-color: rgba(255,255,255,0.2);
@@ -587,14 +593,28 @@
 }
 
 .activetask{
+    position:relative;
     margin: 10px 0 0 10px;
     width:560px;
 }
-.activetask-drop{
-    width:570px;
-    height:30px;
-    background-color: #fff;
+.activetask-drop-before{
+    position:absolute;
+    width:580px;
+    height:20px;
+    top: 0px;
+    left: -10px;
 }
+.activetask-drop-after{
+    position:absolute;
+    width:580px;
+    height:20px;
+    top: 20px;
+    left: -10px;
+}
+.activetask_dragmotion{
+    transition: position 0.5s;
+}
+
 .activetask img:hover{
     opacity:0.6;
 }
@@ -608,7 +628,6 @@
     height: 64px;
     transition: 0.2s;
 }
-
 
 .activetask_buttons{
     float:top; 
@@ -659,11 +678,25 @@
 }
 .activetask-info-title_show > p{
     padding: 3px 0 0 0;
-    width: 450px;
-    margin: 0;
+    width: 380px;
     overflow:hidden;
+    white-space:nowrap;
+    float:left;
 }
-
+.activetask-info-title-show_sub{
+    padding: 1px 4px 1px 4px;
+    font-size: 10px;
+    width: 67px;
+    overflow:hidden;
+    background-color: rgba(200,200,200,0.7);
+    margin-top:5px;
+    margin-left:5px;
+    border-radius:4px;
+    color: #33f;
+    white-space:nowrap;
+    float:left;
+    height:15px;
+}
 .activetask-info_input{
     float:left;
     overflow:hidden;
@@ -698,7 +731,6 @@
 .activetask_dragging{
     background-color: #ffffff;
     opacity:0.5;
-    position:absolute;
 }
 
 

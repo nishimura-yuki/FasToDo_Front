@@ -1,7 +1,8 @@
 
 var ActiveTask = require("./../template/activetask.jsx");
 var DoneTask = require("./../template/donetask.jsx");
-var TaskBase = require("./../component/taskbase.js");
+var TaskAdd = require("./../template/taskadd.jsx");
+var TaskListBase = require("./../component/tasklistbase.js");
 
 module.exports = React.createClass({
     propTypes: {
@@ -9,7 +10,7 @@ module.exports = React.createClass({
             type: React.PropTypes.string.isRequired,
             id: React.PropTypes.string.isRequired
         }),
-        drag: React.PropTypes.object.isRequired, 
+        drag: React.PropTypes.string.isRequired, 
         tasks: React.PropTypes.object.isRequired,
         folders: React.PropTypes.array.isRequired,
         days: React.PropTypes.object.isRequired,
@@ -19,131 +20,31 @@ module.exports = React.createClass({
         taskDelete: React.PropTypes.func.isRequired,
         taskActive: React.PropTypes.func.isRequired,
         taskDone: React.PropTypes.func.isRequired,
-        taskDrag: React.PropTypes.func.isRequired
+        taskOrderForDate: React.PropTypes.func.isRequired,
+        taskOrderForFolder: React.PropTypes.func.isRequired,
+        taskDrag: React.PropTypes.func.isRequired,
+        taskDrop: React.PropTypes.func.isRequired
 
     },
-    _init_state: {
-        editing_id:false
-    },
-    getInitialState: function () {
-        return this._init_state;
-    },
+
     componentWillReceiveProps: function(newProps){
+        /*
         if( newProps.reset ){
             this.setState( this._init_state );
         }
+        */
     },
 
-    _taskDrop: function(id , type){
-        console.log("enter " + id + ":" + type);
-    },
-
-    _taskEdit: function(id){
-        console.log("edit " + id);
-        this.setState( {editing_id: id} );
-    }, 
-    _taskCancel: function(id){
-        console.log("cancel " + id);
-        this.setState( {editing_id: false} );        
-    },
-
-    createActiveTasks: function( ids ){
-
-        var node = [];
-
-        var taskMap = {};
-        var dates = [];
-        var dragid = false;
-        var dragging_date = "";
-        if(this.props.drag && this.props.drag.type == "task"){
-            dragid = this.props.drag.id; 
-        }
+    getTaskList:function( ids ){
+        var resList = [];
         for( var i=0; i<ids.length; i++ ){
              var t = this.props.tasks[ids[i].id];
              if( !t ) continue;
-             if(t.status == "active"){
-                if(t.taskid == dragid){
-                    dragging_date = t.date; 
-                }
-                var dateList = taskMap[t.date];
-                if(!dateList){
-                    taskMap[t.date] = dateList = [];
-                    dates.push( t.date );
-                }
-                dateList.push( t ); 
-            }
-         }
-         dates.sort(); 
-         for( var i=0;i<dates.length;i++ ){
-               node.push(
-                    <ActiveTaskList key={dates[i]} date={dates[i]} 
-                        tasks={taskMap[dates[i]]}
-                        folders={this.props.folders}
-                        days={this.props.days}
-                        drag={this.props.drag}
-                        dragging={dragging_date == dates[i]}
-                        edit={this.state.editing_id}
-                        taskUpdate={this.props.taskUpdate}
-                        taskDelete={this.props.taskDelete}
-                        taskDone={this.props.taskDone}
-                        taskActive={this.props.taskActive}
-                        taskDrag={this.props.taskDrag}
-                        taskDrop={this._taskDrop}
-                        taskEdit={this._taskEdit}
-                        taskCancel={this._taskCancel}
-                    />
-               ); 
-         }
-         return node;
-    },
-    /*
-    createTasks: function( ids ){
-        var tasks = {active:[], done:[]}; 
-
-        var show_id = false;
-        var show_type = {};
-        if(this.state.dragging && this.state.dragging.type == "task"){
-            show_id = this.state.dragging.id; 
-            show_type = {type:"drag", 
-                         pos:{x:this.state.dragging.pos.x,
-                              y:this.state.dragging.pos.y
-                         },
-                         diff:{x:this.state.dragging.diff.x,
-                               y:this.state.dragging.diff.y
-                         }
-            };
-        }else{
-            show_id = this.state.editing_id; 
-            show_type = {type:"edit"};
+             resList.push( t );
         }
-        for( var i=0; i<ids.length; i++ ){
-            var t = this.state.data.tasks[ids[i].id];
-            if( !t ) continue;
-            switch(t.status){
-                case "active":
-                    tasks.active.push( this.createActiveTask(t , 
-                                       t.taskid == show_id ? show_type : {type:"show"} 
-                                       )
-                                     );
-
-                    break;
-                case "done":
-                    tasks.done.push( this.createDoneTask(t) );
-                    break;
-            }
-        } 
-        
-        return tasks;
-
+        return resList; 
     },
 
-    createDoneTask: function( task ){
-        return (<DoneTask key={task.taskid} data={task} 
-                    onDelete={this.taskDelete}
-                    onActive={this.taskActive}
-                />);
-    },
-*/
     render: function(){
 
         var title = "";
@@ -152,22 +53,66 @@ module.exports = React.createClass({
         var defaultDate = "";
         var defaultFolder = "";
         var notfound = true;
+        var listNode = (<div></div>);
         if( this.props.state.type == "day" ){
-            var d = this.props.days[this.props.state.id]; 
-            if( d ){
-                defaultDate = d.date; 
-                title       = d.name; 
+            if( this.props.state.id == "past" ){
+                title    = this.props.days.past.name; 
                 notfound = false;
-                activetaskNode = this.createActiveTasks( d.ids );
+                listNode = (<TaskListForPast 
+                                tasks={ this.getTaskList( this.props.days.past.ids ) }
+                                folders={this.props.folders}
+                                days={this.props.days}
+                                drag={this.props.drag}
+                                taskUpdate={this.props.taskUpdate}
+                                taskDelete={this.props.taskDelete}
+                                taskDone={this.props.taskDone}
+                                taskOrder={this.props.taskOrderForDate}
+                                taskActive={this.props.taskActive}
+                                taskDrag={this.props.taskDrag}
+                                taskDrop={this.props.taskDrop}
+                            />);
+            }else{
+                var d = this.props.days[this.props.state.id]; 
+                if( d ){
+                    title    = d.name; 
+                    notfound = false;
+                    listNode = (<TaskListForDate  date={d} 
+                                    tasks={ this.getTaskList( d.ids ) }
+                                    folders={this.props.folders}
+                                    days={this.props.days}
+                                    drag={this.props.drag}
+                                    taskAdd={this.props.taskAdd}
+                                    taskUpdate={this.props.taskUpdate}
+                                    taskDelete={this.props.taskDelete}
+                                    taskDone={this.props.taskDone}
+                                    taskOrder={this.props.taskOrderForDate}
+                                    taskActive={this.props.taskActive}
+                                    taskDrag={this.props.taskDrag}
+                                    taskDrop={this.props.taskDrop}
+                                />);
+                }
             }
+            
         }else if( this.props.state.type == "folder"){
             var f = this.props.folders;
             for( var i=0;i<f.length; i++ ){
                 if( this.props.state.id == f[i].folderid ){
-                    defaultFolder = this.props.state.id;              
                     title = f[i].name;
-                    activetaskNode = this.createActiveTasks( f[i].ids );
                     notfound = false;
+                    listNode = (<TaskListForFolder folder={f[i]} 
+                                    tasks={ this.getTaskList( f[i].ids ) }
+                                    folders={this.props.folders}
+                                    days={this.props.days}
+                                    drag={this.props.drag}
+                                    taskAdd={this.props.taskAdd}
+                                    taskUpdate={this.props.taskUpdate}
+                                    taskDelete={this.props.taskDelete}
+                                    taskDone={this.props.taskDone}
+                                    taskOrder={this.props.taskOrderForFolder}
+                                    taskActive={this.props.taskActive}
+                                    taskDrag={this.props.taskDrag}
+                                    taskDrop={this.props.taskDrop}
+                                />);
                     break;
                 }
             }
@@ -184,252 +129,114 @@ module.exports = React.createClass({
                 </div>
             );
         }
-        
-        var addNode = (<div key="taskadd" ></div>);
-        var doneNode = (<div key="donetasks"></div>);
-        if(this.props.state.type != "day" || this.props.state.id != "past"){
-            addNode =  ( <TaskAdd key="taskadd" 
-                            folders={this.props.folders}
-                            days={this.props.days}
-                            defaultdate={defaultDate}
-                            defaultfolder={defaultFolder}
-                            add={this.props.taskAdd}
-                        />
-                      ); 
-        }
 
         return (
             <div className="content-main">
                 <div className="content-main-inner">
                     <div className="menu-title" >
-                        <p>{this.props.state.name}</p>
+                        <p>{title}</p>
                     </div>
-                    {addNode} 
-                    <div className="task-list">
-                        <div className="task-list_active">
-                            {activetaskNode}
-                        </div>
-                        <div className="task-separate-line" />
-                        <div className="task-list_done">
-                        </div>
-                    </div>
-                </div>
+                    {listNode}
+               </div>
             </div>
         )
     }
 });
 
-var TaskAdd = React.createClass({
-    mixins: [TaskBase],
+var TaskListForDate = React.createClass({
+    mixins: [TaskListBase] ,
     propTypes: {
-        defaultdate:   React.PropTypes.string, 
-        defaultfolder: React.PropTypes.string, 
-        add: React.PropTypes.func.isRequired
+        date: React.PropTypes.object.isRequired ,
+        taskAdd: React.PropTypes.func.isRequired,
     },
     _init_state: { 
-        showtype: "show" ,
-        title: "" ,
-        date: "",
-        folder :"",
-        error : null,
+        editing_id: null 
     },
     getInitialState: function(){
-        var state = this._init_state;
-        state.date = this.props.defaultdate;
-        state.folder = this.props.defaultfolder;
-        return state;
+        return this._init_state; 
     },
-    componentWillReceiveProps: function(newProps){
-        var state = this._init_state;
-        state.date = newProps.defaultdate;
-        state.folder = newProps.defaultfolder;
-        this.setState(state); 
-    },
-    _onClickAdd: function(e){
-        e.preventDefault();
-        if(this.state.showtype != "add"){
-            this.setState({showtype: "add"});
-        } 
-    },
-    _onClickCancel: function(e){
-        e.preventDefault();
-        if(this.state.showtype != "show"){
-            this.setState({showtype: "show", error:null});
-        } 
-    },
-    _onSave: function(){
 
-        var title  = this.state.title ? this.state.title.trim()  : "";
-        var date   = this.state.date  ? this.state.date.trim()   : "";
-        var folder = this.state.folder? this.state.folder.trim() : null;
-        var error = this.validate(title, date, folder);
-        if(error){
-            this.setState(error);
-            return; 
-        }
+    _taskEdit: function(id){
+        this.setState( {editing_id: id} );
+    }, 
+    _taskCancel: function(id){
+        this.setState( {editing_id: null} );        
+    },
+    _taskUpdate: function(id, data){
+        this.props.taskUpdate(id, data);
+        this.setState( {editing_id: null} );
+    },
 
-        this.props.add(
-            {title: title, 
-             date: date,
-             folderid: folder
-            } 
-        );
+    createTaskList: function( ){
+
+        var resNode = {active: [], done: []};
+
+        var activetaskMap = {};
+        var donetaskMap = {};
+        var activeDates = [];
+        var doneDates = [];
         
-    },
-    _onChangeTitle:function(event){
-        this.setState({ title: event.target.value });
-    },
-    _onChangeDate:function(event){
-        this.setState({ date: event.target.value });
-    },
-    _onChangeFolder:function(event){
-        this.setState({ folder: event.target.value });
-    },
-    render: function(){
-        var classnameNew   = "task-add_new";
-        var classnameInput = "task-add_input";
-        var classnameClose = "task-add_close";
-        var classnameInfo  = "task-add-input_info";
-        var errorTitle = "";
-        var errorDate = "";
-        var errorMesTitle = "";
-        var errorMesDate = "";
-        var errorMesFolder = "";
-        if(this.state.showtype != "add"){
-            classnameClose += " hidden";
-            classnameInput += " task-add-input_close";
-            classnameInfo += " task-add-input-info_close";
-        }else{
-            classnameNew += " hidden";
-            classnameInfo += " task-add-input-info_open";
-            if(this.state.error){
-                if(this.state.error.title){
-                    errorTitle = "p_input-error";
-                    errorMesTitle = this.state.error.title;
+        var dragid = this.props.drag;
+
+        var activedragDate = "";
+        var donedragDate = "";
+        for( var i=0; i<this.state.tasks.length; i++ ){
+            var t = this.state.tasks[i];
+            if(t.status == "active"){
+                if(t.taskid == dragid){
+                    activedragDate = t.date; 
                 }
-                if(this.state.error.date){
-                    errorDate = "p_input-error";
-                    errorMesDate = this.state.error.date;
+                var dateList = activetaskMap[t.date];
+                if(!dateList){
+                    activetaskMap[t.date] = dateList = [];
+                    activeDates.push( t.date );
                 }
-                if(this.state.error.folder){
-                    errorMesFolder = this.state.error.folder;
+                dateList.push( t ); 
+            }else if(t.status == "done"){
+                if(t.taskid == dragid){
+                    donedragDate = t.date; 
                 }
+                var dateList = donetaskMap[t.date];
+                if(!dateList){
+                    donetaskMap[t.date] = dateList = [];
+                    doneDates.push( t.date );
+                }
+                dateList.push( t );            
             }
         }
-        
-        var folders = this.props.folders.map(function (f) {
-            return (
-                <option value={f.folderid}>{f.name}</option>
-            );
-        });
+        activeDates.sort(); 
+        doneDates.sort(); 
 
-        return (
-            <div className="task-add">
-                <div className={classnameNew} >
-                    <a href="#" onClick={this._onClickAdd} >
-                        <img src="/images/add-icon.png" alt=""/>
-                        <span>{Messages.get("app").add}</span>
-                    </a>
-                </div>
-                <div className={classnameInput} >
-                    <div className={classnameClose} >
-                        <a href="#" onClick={this._onClickCancel} >
-                            <img src="/images/remove-icon.png" alt=""/>
-                        </a>
-                    </div>
-                    <div className={classnameInfo} >
-                        <div className="task-add-input-info_title" > 
-                            <input className={"task-title-input "+errorTitle} type="text" name="title" 
-                                onChange={this._onChangeTitle} 
-                                value={this.state.title} 
-                            />
-                        </div>
-                        <div className="task-add-input-info_date" >
-                            <input className={"task-date-input "+errorDate} type="text" name="date" 
-                                onChange={this._onChangeDate}
-                                placeholder="yyyy/mm/dd" value={this.state.date} 
-                            />
-                        </div>
-                        <div className="task-add-input-info_folder" >
-                            <select className="task-folder-select" name="folder" ref="folder" 
-                                onChange={this._onChangeFolder} value={this.state.folder} 
-                            >
-                                <option value="" >{Messages.get("app").empty_select}</option>
-                                {folders}
-                            </select>
-                        </div>
-                        <div className="task-add-input-info_buttons">
-                            <button className="task-save-button" type="button" name="save" onClick={this._onSave} >{Messages.get("app").save}</button>
-                        </div>            
-                    </div>
-                    <div className="both task-add-input_error">
-                            <p>{errorMesTitle}</p>
-                            <p>{errorMesDate}</p>
-                            <p>{errorMesFolder}</p>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-});
-
-var ActiveTaskList = React.createClass({
-    propTypes: {
-        date:  React.PropTypes.string.isRequired, 
-        tasks: React.PropTypes.array.isRequired ,
-        folders: React.PropTypes.array.isRequired,
-        days: React.PropTypes.object.isRequired,
-        drag: React.PropTypes.object ,
-        edit: React.PropTypes.string ,
-        dragging: React.PropTypes.bool,
-
-        taskUpdate: React.PropTypes.func.isRequired,
-        taskDelete: React.PropTypes.func.isRequired,
-        taskActive: React.PropTypes.func.isRequired,
-        taskDone: React.PropTypes.func.isRequired,
-        taskDrag: React.PropTypes.func.isRequired,
-        taskDrop: React.PropTypes.func.isRequired,
-        taskEdit: React.PropTypes.func.isRequired,
-        taskCancel: React.PropTypes.func.isRequired
-
+        for( var i=0;i<activeDates.length;i++ ){
+            var d = null;
+            var dat = activeDates[i];
+            if(activedragDate == dat){
+                d = dragid; 
+            }
+            resNode.active.push( this.createActiveTaskList( activetaskMap[dat], dat, d ) );
+         }
+         return resNode;
     },
 
-    createActiveTask: function( task , show){
-        return (<ActiveTask key={task.taskid} data={task} 
-                    show={show}
-                    onSave={this.props.taskUpdate}
-                    onDelete={this.props.taskDelete}
-                    onDone={this.props.taskDone}
-                    onDrag={this.props.taskDrag}
-                    onEdit={this.props.taskEdit}
-                    onCancel={this.props.taskCancel}
-                    onDrop={this.props.taskDrop}
-                    folders={this.props.folders}
-                    days={this.props.days}
-                />);
-    },
-
-    render:function(){
-     
+    createActiveTaskList: function( tasks, date, dragid){
         var classDrag = "";
         var taskNode = []; 
-        var show_id = false;
-        var target_show_type = {};
+        var show_id = null;
+        var target_show_type = {type:"edit"};
         var default_show_type = {type:"show"};
-        if(this.props.dragging){
-            show_id = this.props.drag.id; 
-            target_show_type = {type:"drag", 
-                         pos:{x:this.props.drag.pos.x,
-                              y:this.props.drag.pos.y
-                         }
-            };
+        var onDropFunc = this._preventDefault;
+        var onOverFunc = this._preventDefault;
+        if(dragid){
+            show_id = dragid; 
+            target_show_type = {type:"drag"};
             default_show_type = {type:"drop"};
             classDrag = "task-list-active-date-list_drag";
-        }else{
-            show_id = this.props.edit; 
-            target_show_type = {type:"edit"};
+            onDropFunc = this._onDrop;
+            onOverFunc = this._onDragOver;
+        }else if(this.state.editing_id){
+            default_show_type = {type:"stay"};
+            show_id = this.state.editing_id; 
         }
-        var tasks = this.props.tasks;
         for( var i=0; i<tasks.length; i++ ){
             var show = default_show_type;
             if( tasks[i].taskid == show_id ){
@@ -441,14 +248,286 @@ var ActiveTaskList = React.createClass({
         return (
             <div className="task-list-active_date" >
                 <div className="task-list-active-date_title">
-                    {"-- " + this.props.date + " --"}
+                    {"-- " + date + " --"}
                 </div>
-                <div className={"task-list-active-date_list "+classDrag}>
+                <div className={"task-list-active-date_list "+classDrag} 
+                     onDrop={onDropFunc}
+                     onDragOver={onOverFunc}>
                     {taskNode}
                 </div>
             </div>
         );
-    
+    },
+
+    createActiveTask: function( task, show ){
+        return (<ActiveTask key={task.taskid} data={task} 
+                    show={show}
+                    folders={this.props.folders}
+                    days={this.props.days}
+                    sub="folder"
+                    onSave={this._taskUpdate}
+                    onDelete={this.props.taskDelete}
+                    onDone={this.props.taskDone}
+                    onDrag={this.props.taskDrag}
+                    onEdit={this._taskEdit}
+                    onCancel={this._taskCancel}
+                    onDragOver={this._onTaskDragOver}
+                    onDragEnd={this._onTaskDragEnd}
+                />);
+    },
+
+    render:function(){
+
+        var taskList = this.createTaskList();
+        return ( <div>
+                    <TaskAdd
+                        folders={this.props.folders}
+                        days={this.props.days}
+                        defaultdate={this.props.date.date}
+                        defaultfolder=""
+                        add={this.props.taskAdd}
+                    />
+                    <div className="task-list">
+                        <div className="task-list_active">
+                            {taskList.active}
+                        </div>
+                        <div className="task-separate-line" />
+                        <div className="task-list_done">
+                            {taskList.done}
+                        </div>
+                    </div>
+                 </div>
+               );
+
+    } 
+
+});
+
+var TaskListForPast = React.createClass({
+    mixins: [TaskListBase] ,
+    _init_state: { 
+        editing_id: null 
+    },
+    getInitialState: function(){
+        return this._init_state; 
+    },
+
+    _taskEdit: function(id){
+        this.setState( {editing_id: id} );
+    }, 
+    _taskCancel: function(id){
+        this.setState( {editing_id: null} );        
+    },
+    _taskUpdate: function(id, data){
+        this.props.taskUpdate(id, data);
+        this.setState( {editing_id: null} );
+    },
+
+    createTaskList: function( ){
+
+        var resNode = [];
+
+        var activetaskMap = {};
+        var activeDates = [];
+        var dragid = this.props.drag;
+
+        var activedragDate = "";
+        for( var i=0; i<this.state.tasks.length; i++ ){
+            var t = this.state.tasks[i];
+            if(t.status == "active"){
+                if(t.taskid == dragid){
+                    activedragDate = t.date; 
+                }
+                var dateList = activetaskMap[t.date];
+                if(!dateList){
+                    activetaskMap[t.date] = dateList = [];
+                    activeDates.push( t.date );
+                }
+                dateList.push( t ); 
+            }
+        }
+        activeDates.sort(); 
+        for( var i=0;i<activeDates.length;i++ ){
+            var d = null;
+            var dat = activeDates[i];
+            if(activedragDate == dat){
+                d = dragid; 
+            }
+            resNode.push( this.createActiveTaskList( activetaskMap[dat], dat, d ) );
+         }
+         return resNode;
+    },
+
+    createActiveTaskList: function( tasks, date, dragid){
+        var classDrag = "";
+        var taskNode = []; 
+        var show_id = null;
+        var target_show_type = {type:"edit"};
+        var default_show_type = {type:"show"};
+        var onDropFunc = this._preventDefault;
+        var onOverFunc = this._preventDefault;
+        if(dragid){
+            show_id = dragid; 
+            target_show_type = {type:"drag"};
+            default_show_type = {type:"drop"};
+            classDrag = "task-list-active-date-list_drag";
+            onDropFunc = this._onDrop;
+            onOverFunc = this._onDragOver;
+        }else if(this.state.editing_id){
+            default_show_type = {type:"stay"};
+            show_id = this.state.editing_id; 
+        }
+        for( var i=0; i<tasks.length; i++ ){
+            var show = default_show_type;
+            if( tasks[i].taskid == show_id ){
+                show = target_show_type; 
+            }
+            taskNode.push( this.createActiveTask( tasks[i] , show ) );
+        } 
+        
+        return (
+            <div className="task-list-active_date" >
+                <div className="task-list-active-date_title">
+                    {"-- " + date + " --"}
+                </div>
+                <div className={"task-list-active-date_list "+classDrag} 
+                     onDrop={onDropFunc}
+                     onDragOver={onOverFunc}>
+                    {taskNode}
+                </div>
+            </div>
+        );
+    },
+
+    createActiveTask: function( task, show ){
+        return (<ActiveTask key={task.taskid} data={task} 
+                    show={show}
+                    folders={this.props.folders}
+                    days={this.props.days}
+                    sub="folder"
+                    onSave={this._taskUpdate}
+                    onDelete={this.props.taskDelete}
+                    onDone={this.props.taskDone}
+                    onDrag={this.props.taskDrag}
+                    onEdit={this._taskEdit}
+                    onCancel={this._taskCancel}
+                    onDragOver={this._onTaskDragOver}
+                    onDragEnd={this._onTaskDragEnd}
+                />);
+    },
+
+    render:function(){
+
+        var taskList = this.createTaskList();
+
+        return ( <div>
+                    <div className="task-list">
+                        <div className="task-list_active">
+                            {taskList}
+                        </div>
+                    </div>
+                 </div>
+               );
+
+    } 
+
+});
+
+var TaskListForFolder = React.createClass({
+    mixins: [TaskListBase] ,
+    propTypes: {
+        folder: React.PropTypes.object.isRequired ,
+        taskAdd: React.PropTypes.func.isRequired,
+    },
+    _init_state: { 
+        editing_id: null 
+    },
+    getInitialState: function(){
+        return this._init_state; 
+    },
+    _taskEdit: function(id){
+        this.setState( {editing_id: id} );
+    }, 
+    _taskCancel: function(id){
+        this.setState( {editing_id: null} );        
+    },
+    _taskUpdate: function(id, data){
+        this.props.taskUpdate(id, data);
+        this.setState( {editing_id: null} );
+    },
+
+    createTaskList: function(){
+        var taskNode = []; 
+        var show_id = null;
+        var target_show_type = {type:"edit"};
+        var default_show_type = {type:"show"};
+        if(this.props.drag){
+            show_id = this.props.drag; 
+            target_show_type = {type:"drag"};
+            default_show_type = {type:"drop"};
+        }else if(this.state.editing_id){
+            default_show_type = {type:"stay"};
+            show_id = this.state.editing_id; 
+        }
+
+        var tasks = this.state.tasks;
+        for( var i=0; i<tasks.length; i++ ){
+            var show = default_show_type;
+            if( tasks[i].taskid == show_id ){
+                show = target_show_type; 
+            }
+            taskNode.push( this.createActiveTask( tasks[i] , show ) );
+        } 
+        return taskNode;
+    },
+
+    createActiveTask: function( task, show ){
+        return (<ActiveTask key={task.taskid} data={task} 
+                    show={show}
+                    folders={this.props.folders}
+                    days={this.props.days}
+                    sub="date"
+                    onSave={this._taskUpdate}
+                    onDelete={this.props.taskDelete}
+                    onDone={this.props.taskDone}
+                    onDrag={this.props.taskDrag}
+                    onEdit={this._taskEdit}
+                    onCancel={this._taskCancel}
+                    onDragOver={this._onTaskDragOver}
+                    onDragEnd={this._onTaskDragEnd}
+                />);
+    },
+
+    render:function(){
+
+        var taskList = this.createTaskList();
+        var classDrag = "";
+        if(this.props.drag){
+            classDrag = "task-list-active-date-list_drag"; 
+        }
+
+        return ( <div>
+                    <TaskAdd
+                        folders={this.props.folders}
+                        days={this.props.days}
+                        defaultdate=""
+                        defaultfolder={this.props.folder.folderid}
+                        add={this.props.taskAdd}
+                    />
+                    <div className="task-list">
+                        <div className="task-list_active">
+                            <div>
+                                <div className={"task-list-active-date_list "+classDrag} 
+                                    onDrop={this._onDrop}
+                                    onDragOver={this._onDragOver}>
+                                    {taskList}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+               );
+
     } 
 
 });
