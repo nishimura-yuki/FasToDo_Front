@@ -17,100 +17,30 @@ module.exports = React.createClass({
         reset: React.PropTypes.bool,
 
         folderAdd: React.PropTypes.func.isRequired,
-        folderEdit: React.PropTypes.func.isRequired,
-        folderDelete: React.PropTypes.func.isRequired
+        folderUpdate: React.PropTypes.func.isRequired,
+        folderDelete: React.PropTypes.func.isRequired,
+        folderOrder: React.PropTypes.func.isRequired
 
     },
-    _init_state: {
-        editing_id:false
-    },
-    getInitialState: function () {
-        return this._init_state;
-    },
     componentWillReceiveProps: function(newProps){
+        /*
         if( newProps.reset ){
             this.setState( this._init_state );
         }
-    },
-
-    _folderAdd:function( data ){
-        this.props.folderAdd( data ); 
-    },
-    _folderEdit:function( id, data ){
-        this.props.folderEdit( id, data ); 
-        this.setState( this._init_state );
-    },
-    _folderDelete:function( id ){
-        this.props.folderDelete( id ); 
-        this.setState( this._init_state );
-    },
-
-    onOpenEditFolder:function(id){
-        if(this.state.editing_id != id){
-            this.setState({editing_id:id});
-        }else if(this.state.editing_id == id){
-            this.onCancelEditFolder();
-        }
-    },
-    onCancelEditFolder:function(){
-        this.setState({editing_id:false});
-    },
-
-    createFolderNode:function(){
-        var _this = this;
-        var folders = this.props.folders.map(function (folder) {
-            var editing = false;
-            if(_this.state.editing_id == folder.folderid){
-                editing = true; 
-            }
-            return (
-                <FolderMenu key={folder.folderid} id={folder.folderid}
-                            count={folder.count} name={folder.name}
-                            onEdit={_this.onOpenEditFolder}
-                            editing={editing}
-                />
-            );
-        }); 
-        return folders;
+        */
     },
 
     render: function(){
-        
-        var folderNode = this.createFolderNode();
-        var folderPopup = (<div key="folder_edit_popup"></div>);
-        if(this.state.editing_id){
-            var folders = this.props.folders;
-            var edit_folder = null;
-            for(var i=0;i<folders.length; i++){
-                if(folders[i].folderid == this.state.editing_id){
-                    edit_folder =  folders[i];
-                } 
-            } 
-            if(edit_folder){
-                folderPopup = (<FolderEditPopup key="folder_edit_popup"
-                                    parent={this.state.editing_id}
-                                    folder={edit_folder}
-                                    onSave={this._folderEdit}
-                                    onDelete={this._folderDelete}
-                                    onCancel={this.onCancelEditFolder}
-                                 />); 
-            }
-        }
-
         return (
-            <div>
-                <div className="content-menu">
-                    <DayMenus data={this.props.days} />
-                    <div className="folder-menus">
-                        <FolderAdd add={this._folderAdd}
-                            folders={this.props.folders} 
-                        />
-                        <div className="folder-list">
-                            {folderNode}
-                        </div>
-                    </div>
-                </div>
-                {folderPopup}
+            <div className="content-menu">
+                <DayMenus data={this.props.days} />
+                <FolderMenus 
+                    folders={this.props.folders}
+                    folderAdd={this.props.folderAdd}
+                    folderDelete={this.props.folderDelete}
+                    folderUpdate={this.props.folderUpdate}
+                    folderOrder={this.props.folderOrder}
+                />
             </div>
         ) 
     }
@@ -136,10 +66,220 @@ var DayMenus = React.createClass({
     }
 });
 
+var FolderMenus = React.createClass({
+    
+    propTypes: {
+        folders: React.PropTypes.array.isRequired,
+
+        folderAdd: React.PropTypes.func.isRequired,
+        folderUpdate: React.PropTypes.func.isRequired,
+        folderDelete: React.PropTypes.func.isRequired,
+        folderOrder: React.PropTypes.func.isRequired
+    },
+  
+    _init_state: {
+        target_id:null,
+        edit_type:null,
+        folders: [],
+        timer: null
+    },
+    getInitialState: function () {
+        var s = this._init_state;
+        s.folders = [].concat( this.props.folders );
+        return s;
+    },  
+    componentWillReceiveProps: function(newProps){
+        this.setState({ folders: [].concat(newProps.folders) }); 
+    },
+ 
+    resetEdit: function(){
+        this.setState({edit_type:null, target_id:null});
+    },
+
+    _folderUpdate:function( id, data ){
+        this.props.folderUpdate( id, data ); 
+        this.resetEdit();
+    },
+    _folderDelete:function( id ){
+        this.props.folderDelete( id ); 
+        this.resetEdit();
+    },
+
+    _onOpenFolderPopup:function(id){
+        if(this.state.edit_type == "edit"){
+            if(this.state.target_id != id){
+                this.setState({edit_type:"edit", target_id:id});
+            }else if(this.state.target_id == id){
+                this._onCloseFolderPopup();
+            }
+        }else if( this.state.edit_type != "drag" ){
+            this.setState({edit_type:"edit", target_id:id});
+        }
+    },
+    _onCloseFolderPopup:function(){
+        this.resetEdit();
+    },
+
+    _onFolderDrag:function(id){
+        this.setState({edit_type:"drag", target_id:id});
+    },
+    _onFolderDragEnd:function(){
+        console.log("drag end main");
+        if(this.isChangedOrder()){
+            console.log("changed end");
+            var _this = this;
+            this.setState( {timer: setTimeout(function(){
+                console.log("timer generate");
+                _this.setState({timer:null});
+                _this.resetEdit();
+            }, 300)} );
+        }else{
+            this.resetEdit();
+        }
+    },
+    _onFolderDragOver:function(id, type){
+        console.log(id +" : " + type) ;
+        if(this.state.edit_type != "drag") return;
+
+        var dragFolder = null;
+        var folders = this.state.folders;
+        for(var i=0;i<folders.length;i++){
+            if(folders[i].folderid == this.state.target_id){
+                dragFolder = folders[i]; 
+                folders.splice(i, 1);
+                break;
+            } 
+        }
+        for(var i=0;i<folders.length;i++){
+            if(folders[i].folderid == id){
+                if(type == "before"){
+                    folders.splice(i, 0, dragFolder);
+                }else{
+                    folders.splice((i+1), 0, dragFolder);
+                }
+                break;
+            } 
+        }
+        this.setState({folders:folders});
+    },
+    _onDrop:function(event){
+        console.log("drop!!"); 
+        if(this.state.timer){
+            clearTimeout(this.state.timer);
+            this.setState({timer:null});
+        }
+        if(this.state.edit_type == "drag"){
+            if(this.isChangedOrder()){
+                console.log("changed drop");
+                var currFolders = this.state.folders;
+                var beforeId = "top";
+                for(var i=0; i<currFolders.length; i++){
+                    if(currFolders[i].folderid == this.state.target_id){
+                        break; 
+                    }
+                    beforeId = currFolders[i].folderid;
+                }
+                this.props.folderOrder( this.state.target_id, beforeId );
+                this.resetEdit();
+            }else{
+                this.resetEdit();
+            }
+        }
+    },
+    _onDragOver:function(event){
+        console.log("drag over on list"); 
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    },
+
+    isChangedOrder: function(){
+        var prevFolders = this.props.folders;
+        var currFolders = this.state.folders;
+        if(prevFolders.length != currFolders.length) return true;
+        for(var i=0; i<prevFolders.length; i++){
+            if(prevFolders[i].folderid != currFolders[i].folderid){
+                return true; 
+            } 
+        } 
+        return false;
+    },
+
+    createFolderNode:function(){
+        var _this = this;
+        var default_showtype = "show";
+        var target_showtype = "show";
+        if(this.state.edit_type == "drag"){
+            default_showtype = "drop";
+            target_showtype = "drag";
+        }else if(this.state.edit_type == "edit"){
+            default_showtype = "stay";
+            target_showtype = "edit";
+        }
+        var folders = this.state.folders.map(function (folder) {
+            var show = default_showtype;
+            if(_this.state.target_id == folder.folderid){
+                show = target_showtype; 
+            }
+            return (
+                <FolderMenu key={folder.folderid} data={folder}
+                            onEdit={_this._onOpenFolderPopup}
+                            onDrag={_this._onFolderDrag}
+                            onDragEnd={_this._onFolderDragEnd}
+                            onDragOver={_this._onFolderDragOver}
+                            show={show}
+                />
+            );
+        }); 
+        return folders;
+    },
+
+    render: function(){
+       
+        var dragClass = "";
+        var folderNode = this.createFolderNode();
+        var folderPopup = (<div key="folder_edit_popup"></div>);
+        if(this.state.edit_type == "edit"){
+            var folders = this.props.folders;
+            var edit_folder = null;
+            for(var i=0;i<folders.length; i++){
+                if(folders[i].folderid == this.state.target_id){
+                    edit_folder =  folders[i];
+                } 
+            } 
+            if(edit_folder){
+                folderPopup = (<FolderEditPopup key="folder_edit_popup"
+                                    parent={this.state.target_id}
+                                    folder={edit_folder}
+                                    onSave={this._folderUpdate}
+                                    onDelete={this._folderDelete}
+                                    onClose={this._onCloseFolderPopup}
+                                 />); 
+            }
+        }else if(this.state.edit_type == "drag"){
+            dragClass = "foldermenus-list_dragging"; 
+        }
+
+        return (
+            <div className="foldermenus">
+                <FolderAdd add={this.props.folderAdd}
+                    folders={this.props.folders} 
+                />
+                <div className={"foldermenus_list "+dragClass}
+                    onDragOver={this._onDragOver} onDrop={this._onDrop} >
+                    {folderNode}
+                </div>
+                {folderPopup}
+            </div>
+        ); 
+    }
+
+}); 
+
 var FolderAdd = React.createClass({
      propTypes: {
         add: React.PropTypes.func.isRequired ,
-        folders: React.PropTypes.array.isRequired
+        folders: React.PropTypes.array.isRequired,
+        reset: React.PropTypes.bool
      },
      _init_state: { 
         showtype: "show" ,
@@ -150,7 +290,11 @@ var FolderAdd = React.createClass({
         return this._init_state;
      }, 
      componentWillReceiveProps: function(newProps){
-        this.setState(this._init_state); 
+        var s = this._init_state;
+        if(!newProps.reset){
+            s.showtype = this.state.showtype;
+        }
+        this.setState( s ); 
      },
      _onClickAdd: function(e){
         e.preventDefault();
@@ -182,6 +326,7 @@ var FolderAdd = React.createClass({
              return;
          } 
          this.props.add({name: this.state.name });
+         this.setState({error:null, showtype:"show"}); 
      },
      _onChangeName:function(event){
          this.setState({ name: event.target.value });
@@ -243,7 +388,7 @@ var FolderEditPopup = React.createClass({
         parent: React.PropTypes.string.isRequired,
         folder: React.PropTypes.object.isRequired,
         onSave: React.PropTypes.func.isRequired,
-        onCancel: React.PropTypes.func.isRequired,
+        onClose: React.PropTypes.func.isRequired,
         onDelete: React.PropTypes.func.isRequired
     },
     _init_state: {
@@ -275,7 +420,7 @@ var FolderEditPopup = React.createClass({
         });
     },
     _onClose:function(){
-        this.props.onCancel(); 
+        this.props.onClose(); 
     },
     _onDelete:function(){
         this.props.onDelete(this.props.folder.folderid); 

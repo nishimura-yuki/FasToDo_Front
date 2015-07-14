@@ -1,5 +1,6 @@
 
 var TaskBase = require("./../component/taskbase.js");
+var Calendar = require("./calendar.jsx");
 
 module.exports = React.createClass({
     mixins: [TaskBase],
@@ -14,6 +15,7 @@ module.exports = React.createClass({
         date: "",
         folder :"",
         error : null,
+        calendar: null
     },
     getInitialState: function(){
         var state = this._init_state;
@@ -65,6 +67,40 @@ module.exports = React.createClass({
     _onChangeDate:function(event){
         this.setState({ date: event.target.value });
     },
+    _onFocusDate: function(event){
+
+        if(this.state.calendar) return;
+
+        var rect = event.target.getBoundingClientRect();
+        var baseBottom = event.target.offsetTop + rect.height;
+        var baseLeft   = event.target.offsetLeft;
+
+        var date = null;
+        var today = new Date(this.props.days.today.date);
+        var tomorrow = new Date(this.props.days.tomorrow.date);
+        if(this.state.date){
+            date = new Date(this.state.date);
+            if(isNaN(date.getTime())){
+                date = null;
+            }
+        } 
+        if(!date) date = today;
+        var calendar = (<Calendar 
+                            date={date}
+                            onDecide={this._onDecideDate} 
+                            today={today}
+                            tomorrow={tomorrow}
+                            top={baseBottom+5}
+                            left={baseLeft-10}
+                        />);
+        this.setState( {calendar:calendar } );   
+    },
+    _onBlurDate: function(event){
+        this.setState( { calendar:null } );
+    },
+    _onDecideDate: function( date ){
+        this.setState( { date: date, calendar:null } );
+    },
     _onChangeFolder:function(event){
         this.setState({ folder: event.target.value });
     },
@@ -106,6 +142,11 @@ module.exports = React.createClass({
             );
         });
 
+        var calendar = (<div></div>);
+        if(this.state.calendar){
+            calendar = this.state.calendar; 
+        }
+
         return (
             <div className="task-add">
                 <div className={classnameNew} >
@@ -130,6 +171,9 @@ module.exports = React.createClass({
                         <div className="task-add-input-info_date" >
                             <input className={"task-date-input "+errorDate} type="text" name="date" 
                                 onChange={this._onChangeDate}
+                                onClick={this._onFocusDate}
+                                onFocus={this._onFocusDate}
+                                onBlur={this._onBlurDate}
                                 placeholder="yyyy/mm/dd" value={this.state.date} 
                             />
                         </div>
@@ -151,6 +195,7 @@ module.exports = React.createClass({
                             <p>{errorMesFolder}</p>
                     </div>
                 </div>
+                {calendar}
             </div>
         )
     }

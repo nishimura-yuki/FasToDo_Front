@@ -393,6 +393,24 @@ module.exports = React.createClass({
                     _this.setState( {data:appData} );
                 });   
     },
+    folderOrder: function( id, beforeid ){
+        var folder = this.getFolderInfo(this.state.data.folders, id);
+        if(!folder) return;
+        if( beforeid != "top" ){
+            folder = this.getFolderInfo(this.state.data.folders, beforeid);
+            if(!folder) return;
+        }
+        Request.put( Define.api_host + "/api/folder/order/" + id)
+               .send({ before:beforeid })
+               .end(function(err, res){
+                    console.log(err);
+                    console.log(res.body);
+        });     
+
+        var appData = this.state.data;
+        this.refreshFolderOrder(appData.folders, id, beforeid);
+        this.setState( {data:appData});   
+    },
     /* data event **/
 
     /* data refresh */
@@ -548,7 +566,8 @@ module.exports = React.createClass({
         }
 
         console.log(ids);
-        this.refreshDateOrder( appData.days );
+        this.sortTaskOrderForDate( appData.days );
+
     },
     refreshTaskOrderForFolder: function(appData, id, beforeid){
         var task = appData.tasks[id];
@@ -575,29 +594,46 @@ module.exports = React.createClass({
             }
         }
         console.log(ids);
-        this.refreshOrderFolderOrder( appData.folders );
+        this.sortTaskOrderForFolder( appData.folders );
     },
-
+    refreshFolderOrder:function(folders, id, beforeid){
+        var folder = this.getFolderInfo(folders, id);
+        var beforeOrder = -1;
+        if(beforeid != "top"){
+            beforeFolder = this.getFolderInfo(folders, beforeid);
+            beforeOrder = beforeFolder.orderid;
+        }
+        for(var i=0;i<folders.length; i++){
+            var f = folders[i];
+            if(f.folderid == folder.folderid){
+                folder.orderid = (beforeOrder+1); 
+            }else{
+                if(f.orderid > beforeOrder){
+                    f.orderid++;
+                } 
+            }
+        }
+        this.sortFolderOrder( folders );   
+    },
     refreshOrder:function( appData ){
-        this.refreshDateOrder( appData.days );
-        this.refreshFolderOrder( appData.folders );
-        this.refreshOrderFolderOrder( appData.folders );
+        this.sortTaskOrderForDate( appData.days );
+        this.sortTaskOrderForFolder( appData.folders );
+        this.sortFolderOrder( appData.folders );
     },
-    refreshDateOrder: function(days){
+    sortTaskOrderForDate: function(days){
         days.today.ids.sort( this.sort );
         days.tomorrow.ids.sort( this.sort );
         days.past.ids.sort( this.sort );
         days.anytime.ids.sort( this.sort );
     },
-    refreshFolderOrder: function(folders){
-        folders.sort( this.sort ); 
-    },
-    refreshOrderFolderOrder: function(folders){
+    sortTaskOrderForFolder: function(folders){
         for(var i=0;i<folders.length;i++){
             folders[i].ids.sort( this.sort ); 
         } 
     },
-
+    sortFolderOrder: function(folders){
+        folders.sort( this.sort ); 
+    },
     /* data refresh **/
     sort: function(a, b){
         if(a.orderid < b.orderid) return -1;
@@ -681,8 +717,9 @@ module.exports = React.createClass({
                         days={this.state.data.days}
                         folders={this.state.data.folders}
                         folderAdd={this.folderAdd}
-                        folderEdit={this.folderUpdate}
+                        folderUpdate={this.folderUpdate}
                         folderDelete={this.folderDelete}
+                        folderOrder={this.folderOrder}
                     />
                     <ContentMain state={state}
                         reset={this.state.reset}

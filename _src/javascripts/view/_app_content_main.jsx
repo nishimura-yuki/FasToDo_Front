@@ -179,7 +179,8 @@ var TaskListForDate = React.createClass({
         var dragid = this.props.drag;
 
         var activedragDate = "";
-        var donedragDate = "";
+        var dateSingleCheck = null;
+        var single = true;
         for( var i=0; i<this.state.tasks.length; i++ ){
             var t = this.state.tasks[i];
             if(t.status == "active"){
@@ -192,16 +193,21 @@ var TaskListForDate = React.createClass({
                     activeDates.push( t.date );
                 }
                 dateList.push( t ); 
-            }else if(t.status == "done"){
-                if(t.taskid == dragid){
-                    donedragDate = t.date; 
+                if(dateSingleCheck != null && dateSingleCheck != t.date){
+                    single = false;
                 }
+                dateSingleCheck = t.date;
+            }else if(t.status == "done"){
                 var dateList = donetaskMap[t.date];
                 if(!dateList){
                     donetaskMap[t.date] = dateList = [];
                     doneDates.push( t.date );
                 }
                 dateList.push( t );            
+                if(dateSingleCheck != null && dateSingleCheck != t.date){
+                    single = false;
+                }
+                dateSingleCheck = t.date;
             }
         }
         activeDates.sort(); 
@@ -215,7 +221,13 @@ var TaskListForDate = React.createClass({
             }
             resNode.active.push( this.createActiveTaskList( activetaskMap[dat], dat, d ) );
          }
+
+         for( var i=0;i<doneDates.length;i++ ){
+            var dat = doneDates[i];
+            resNode.done.push( this.createDoneTaskList( donetaskMap[dat], dat , single) );
+         }
          return resNode;
+
     },
 
     createActiveTaskList: function( tasks, date, dragid){
@@ -274,6 +286,32 @@ var TaskListForDate = React.createClass({
                     onDragOver={this._onTaskDragOver}
                     onDragEnd={this._onTaskDragEnd}
                 />);
+    },
+
+    createDoneTaskList: function( tasks, date, single){
+
+        var taskNode = []; 
+        var singleHidden = single ? "hidden" : ""; 
+        for( var i=0; i<tasks.length; i++ ){
+            taskNode.push( this.createDoneTask( tasks[i] ) );
+        } 
+        return (
+            <div className="task-list-active_date" >
+                <div className={"task-list-active-date_title "+singleHidden}>
+                    {"-- " + date + " --"}
+                </div>
+                <div className="task-list-active-date_list" >
+                    {taskNode}
+                </div>
+            </div>
+        );
+
+    },
+    createDoneTask: function( task ){
+         return (<DoneTask key={task.taskid} data={task} 
+                    onDelete={this.props.taskDelete}
+                    onActive={this.props.taskActive}
+                />);   
     },
 
     render:function(){

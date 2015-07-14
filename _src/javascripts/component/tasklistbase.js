@@ -31,6 +31,7 @@ module.exports = {
 
     _preventDefault: function(event){
         event.preventDefault(); 
+        event.dataTransfer.dropEffect = 'move';
     },
     _onDragOver: function (event) {
         event.preventDefault();

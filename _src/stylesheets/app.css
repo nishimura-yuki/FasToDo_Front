@@ -364,19 +364,43 @@
     margin-left:100px;
 }
 
-.folder-list{
+.foldermenus_list{
     padding: 5px 0 15px 15px;
     margin-left:28px;
+}
+.foldermenus-list_dragging{
+    background-color: rgba(255,255,255,0.2);
 }
 .folder-menu{
     height:33px;
     margin: 20px 0 0 0;
     overflow:hidden;
 }
+.folder-menu_dragging{
+    background-color: #ffffff;
+    opacity:0.5;
+}
+.folder-menu_dropbefore{
+    position:absolute;
+    width:196px;
+    height:22px;
+    top: -6px;
+}
+.folder-menu_dropafter{
+    position:absolute;
+    width:196px;
+    height:22px;
+    top: 18px;
+}
+
 .folder-menu_sort{
     padding-top:5px;
     float:left;
 }
+.folder-menu_sort > img:hover{
+    opacity:0.6;
+}
+
 .folder-menu_section{
     margin-left: 27px;
     border-bottom: 1px solid #000000;
@@ -596,6 +620,7 @@
     position:relative;
     margin: 10px 0 0 10px;
     width:560px;
+    -khtml-user-drag: element;
 }
 .activetask-drop-before{
     position:absolute;

@@ -1,5 +1,6 @@
 
 var TaskBase = require("./../component/taskbase.js");
+var Calendar = require("./calendar.jsx");
 
 module.exports = React.createClass({
     mixins: [TaskBase],
@@ -28,7 +29,8 @@ module.exports = React.createClass({
         title:"",
         date:"",
         folder:"",
-        error: null
+        error: null,
+        calendar: null
     },
     getInitialState: function(){
         return this._init_state;
@@ -86,6 +88,40 @@ module.exports = React.createClass({
     _onChangeDate:function(event){
         this.setState({ date: event.target.value });
     },
+    _onFocusDate: function(event){
+        console.log("on focus");
+        if(this.state.calendar) return;
+        var rect = event.target.getBoundingClientRect();
+        var baseBottom = event.target.offsetTop + rect.height;
+        var baseLeft   = event.target.offsetLeft;
+
+        var date = null;
+        var today = new Date(this.props.days.today.date);
+        var tomorrow = new Date(this.props.days.tomorrow.date);
+        if(this.state.date){
+            date = new Date(this.state.date);
+            if(isNaN(date.getTime())){
+                date = null;
+            }
+        } 
+        if(!date) date = today;
+        var calendar = (<Calendar 
+                            date={date}
+                            onDecide={this._onDecideDate} 
+                            today={today}
+                            tomorrow={tomorrow}
+                            top={baseBottom+5}
+                            left={baseLeft-10}
+                        />);
+        this.setState( {calendar:calendar } );
+    },
+    _onBlurDate: function(event){
+        console.log("on blur");
+        this.setState( { calendar:null } );
+    },
+    _onDecideDate: function( date ){
+        this.setState( { date: date, calendar:null } );
+    },
     _onChangeFolder:function(event){
         this.setState({ folder: event.target.value });
     },
@@ -94,8 +130,7 @@ module.exports = React.createClass({
         console.log("drag start");
         var el = document.getElementById(this.getDOMId());
         el.className = el.className + " activetask_dragging";
-        console.log(this.props.data);
-        event.dataTransfer.setData("task", this.props.data);
+        event.dataTransfer.dropEffect = 'move';
         event.dataTransfer.setDragImage( el, 14, 14);
         this.props.onDrag(this.props.data.taskid);
     },
@@ -104,9 +139,11 @@ module.exports = React.createClass({
         this.props.onDragEnd();
     },
     _onOverBefore: function(event){
+        event.dataTransfer.dropEffect = 'move';
         this.props.onDragOver( this.props.data.taskid, "before" );
     },
     _onOverAfter: function(event){
+        event.dataTransfer.dropEffect = 'move';
         this.props.onDragOver( this.props.data.taskid, "after" );
     },
 
@@ -182,6 +219,11 @@ module.exports = React.createClass({
             );
         });
 
+        var calendar = (<div></div>);
+        if(this.state.calendar){
+            calendar = this.state.calendar; 
+        }
+
         return (
             <div className={"activetask "+ mainClass} id={this.getDOMId()} >
                 {dropBefore}
@@ -216,7 +258,10 @@ module.exports = React.createClass({
                                 </div>
                                 <div className="activetask-info-input_date" >
                                     <input className={"task-date-input "+errorDate} type="text" name="date" 
-                                        onChange={this._onChangeDate}
+                                        onChange={this._onChangeDate} 
+                                        onClick={this._onFocusDate}
+                                        onFocus={this._onFocusDate}
+                                        onBlur={this._onBlurDate}
                                         placeholder="yyyy/mm/dd" value={this.state.date} 
                                     />
                                 </div>
@@ -240,6 +285,7 @@ module.exports = React.createClass({
                     <p>{errorMesDate}</p>
                     <p>{errorMesFolder}</p>
                 </div>
+                {calendar}
             </div>
         ) 
     }

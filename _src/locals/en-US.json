@@ -62,6 +62,32 @@
     "timezone":{
         "Australia/Sydney":"Australia/Sydney",
         "Asia/Tokyo":"Japan/Tokyo"
+    },
+    "calendar":{
+        "month":{
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "May",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Aug",
+            "9": "Sep",
+            "10": "Oct",
+            "11": "Nov",
+            "12": "Dec"
+        },
+        "day":{
+            "sunday":"Sun" ,
+            "monday":"Mon" ,
+            "tuesday":"Tue" ,
+            "wednesday":"Wed" ,
+            "thursday":"Thu" ,
+            "friday":"Fri" ,
+            "saturday":"Sat" 
+        }
     }
+
 
 }

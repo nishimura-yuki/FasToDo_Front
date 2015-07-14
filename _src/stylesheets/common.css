@@ -1,0 +1,139 @@
+
+.calendar-ui{
+    position:absolute;
+    padding: 10px 5px 5px 5px;
+    font-size:10px;
+    background-color:#CDFFD8;
+    border: 2px solid #000;
+    box-shadow: 5px 5px 5px rgba(0,0,0,0.4);
+    border-radius:4px;
+    overflow:hidden;
+    z-index: 999;
+}
+
+.calendar-ui_relative{
+    overflow:hidden;
+}
+.calendar-ui-relative_today{
+    float:left;
+}
+.calendar-ui-relative_tomorrow{
+    float:left;
+}
+
+.calendar-ui_table{
+    border-collapse: separate;
+    border-spacing: 2px;
+}
+.calendar-ui-table_caption{
+    overflow:hidden;
+    position:relative;
+}
+.calendar-ui-table_caption a{
+    text-decoration: none;
+    color: #000;
+}
+.calendar-ui-table-caption_info{
+    font-size:14px;
+    text-align:center;
+    float:left;
+    position: relative;
+    left:50%;
+}
+.calendar-ui-table-caption_info > p{
+    position: relative;
+    left: -50%;
+}
+
+.calendar-ui-table-caption_prev{
+    font-size:14px;
+    text-align:center;
+    background-color:#6070c0;
+    margin-top: 10px;
+    color: #202020;
+    float: left;
+    width:20px;
+    height:20px;
+    position: absolute;
+    border-radius: 3px;
+}
+.calendar-ui-table-caption_next{
+    font-size:14px;
+    text-align:center;
+    background-color:#6070c0;
+    margin-top: 10px;
+    color: #202020;
+    float: right;
+    width:20px;
+    height:20px;
+    border-radius: 3px;
+}
+.calendar-ui-table-caption_prev:hover{
+    background-color:#A1ADE6;
+    color: #cfcfcf;
+}
+.calendar-ui-table-caption_next:hover{
+    background-color:#A1ADE6;
+    color: #cfcfcf;
+}
+
+.calendar-ui_table  th{
+    text-align:center;
+    vertical-align: middle;
+    padding: 1px;
+    width: 23px;
+    height: 20px;
+    border: 1px solid #000;
+    background-color: #cfcfcf;
+    border-radius: 4px;
+}
+.calendar-ui_table td{
+    text-align:right;
+    vertical-align: middle;
+    padding-right: 3px;
+    width: 23px;
+    height: 18px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.calendar-ui-table-day_sunday{
+    color: #cd1414;
+}
+.calendar-ui-table-day_weekday{
+    color: #29332c;
+}
+.calendar-ui-table-day_saturday{
+    color: #1414cd;
+}
+
+.calendar-ui-table-date_out{
+    background-color: #A1B3A8;
+    color: #606060;
+}
+.calendar-ui-table-date_in{
+    background-color: #8AE6A0;
+    color: #141414;
+    font-weight: bold;
+}
+.calendar-ui-table-date_out:hover{
+    background-color: #DBE6DF;
+    color: #9a9a9a;
+}
+.calendar-ui-table-date_in:hover{
+    background-color: #C3F3CE;
+    color: #4d4d4d;
+    font-weight: bold;
+}
+
+.calendar-ui-table-date_base{
+    background-color: #00B312;
+    color: #E0E0E0;
+    font-weight: bold;
+}
+.calendar-ui-table-date_base:hover{
+    background-color: #45E655;
+    color: #2b2b2b;
+    font-weight: bold;
+}
