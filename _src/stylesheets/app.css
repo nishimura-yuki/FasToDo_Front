@@ -7,7 +7,37 @@
     margin: 0 auto 0 auto;
 }
 
+.error-popup_outer{
+    left:50%;
+    top:50%;
+    position:fixed;
+}
+.error-popup{
+    margin: 10px 20px 10px 20px;
+}
+.error-popup_title{
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.error-popup_message{
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-align: right;
+}
+.error-popup_button{
+    text-align: right;
+}
+
 /* Common */
+.error-button{
+    background-color: #3D64CD;
+    color: #C4CADA;
+    border:none;
+}
+.error-button:hover{
+    background-color: #5C81E6;
+    color: #f3f3f3;
+}
 .search-text-input{
     height:24px;
     width: 200px;
@@ -372,7 +402,7 @@
     background-color: rgba(255,255,255,0.2);
 }
 .folder-menu{
-    height:33px;
+    height:34px;
     margin: 20px 0 0 0;
     overflow:hidden;
 }

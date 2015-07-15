@@ -39,11 +39,17 @@
         "not_found":"Not Found",
         "language":"Language",
         "timezone":"Timezone",
+        "keyword":"Keyword",
         "settings":"Settings",
-        "logout":"Logout"
+        "logout":"Logout",
+        "confirm": "OK"
     },
 
     "error":{
+        "message": {
+            "reload": "The page will be reloaded.",
+            "internal":"Sorry, an error has occured." 
+        },
         "required":"%s is required",
         "already_exist":"The email is already registered",
         "login_invalid":"Email or Password is not correct",

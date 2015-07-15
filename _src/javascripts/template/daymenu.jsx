@@ -4,6 +4,7 @@ var Link = ReactRouter.Link;
 module.exports = React.createClass({
     propTypes: {
         count: React.PropTypes.number.isRequired, 
+        link: React.PropTypes.string.isRequired ,
         id: React.PropTypes.string.isRequired ,
         image: React.PropTypes.string.isRequired ,
         name: React.PropTypes.string.isRequired ,
@@ -23,7 +24,7 @@ module.exports = React.createClass({
         return (
             <div className={"day-menu "+classname}>
                 <div className="day-menu_link">
-                    <Link to="list" params={{type: "day", id: this.props.id}}>
+                    <Link to={this.props.link} params={{id: this.props.id}}>
                         <img src={this.props.image} alt=""/>
                         <div className="day-menu-link_name">
                             {this.props.name}

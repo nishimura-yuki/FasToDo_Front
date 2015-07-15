@@ -47,16 +47,15 @@ var AppData = {
 */
 
 var Promise = require("promise");
-
+var RouteHandler = ReactRouter.RouteHandler;
 var ContentMenu = require("./_app_content_menu.jsx");
-var ContentMain = require("./_app_content_main.jsx");
 
 // Content
 module.exports = React.createClass({
-    mixins: [ ReactRouter.State ] ,
     propTypes: {
         user: React.PropTypes.object.isRequired,
-        dates: React.PropTypes.object.isRequired
+        dates: React.PropTypes.object.isRequired,
+        onError: React.PropTypes.func.isRequired
     },
     _init_data:{
         days: {
@@ -98,7 +97,7 @@ module.exports = React.createClass({
                    .query({"condition[schedule.greaterequal]": encodeURI(_this.props.dates.past),
                            "condition[schedule.lessequal]": encodeURI(_this.props.dates.future)})
                    .end(function(err, res){
-                        console.log(err);
+                        if(err) return reject(err);
                         console.log(res.body);
                         resolve(res.body);
                     });
@@ -109,7 +108,7 @@ module.exports = React.createClass({
         return new Promise(function (resolve, reject) {
             Request.get( Define.api_host + "/api/folder")
                    .end(function(err, res){
-                        console.log(err);
+                        if(err) return reject(err);
                         console.log(res.body);
                         resolve(res.body);
                    });
@@ -118,14 +117,15 @@ module.exports = React.createClass({
     loadContentData: function(){
         console.log("content load");
         if(this.state.loading) return;
-        this.setState({data:this._init_data, loading: true, loaded: false});
+        var init_data = JSON.parse( JSON.stringify(this._init_data) );
+        this.setState({data:init_data, loading: true, loaded: false});
         var _this = this;
         Promise.all([ this.loadTask(), this.loadFolder() ])
                .then( function(res){
 
                     var tasks = res[0];
                     var folders = res[1];
-                    var appData = _this._init_data;
+                    var appData = init_data;
                     appData.days.today.name    = Messages.get("app").today;
                     appData.days.tomorrow.name = Messages.get("app").tomorrow;
                     appData.days.anytime.name  = Messages.get("app").anytime;
@@ -170,6 +170,7 @@ module.exports = React.createClass({
                })
                .catch( function(err){
                     //読み込みエラーを通知 
+                    _this.props.onError(err);
                });
     },
 
@@ -180,6 +181,7 @@ module.exports = React.createClass({
         Request.post( Define.api_host + "/api/task")
                .send({ title: data.title, schedule:data.date, folderid:data.folderid })
                .end(function(err, res){
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                     var resData = res.body;
                     var appData = _this.state.data;
@@ -227,7 +229,7 @@ module.exports = React.createClass({
         Request.put( Define.api_host + "/api/task/" + id)
                .send({ task: taskData, folder:folderData })
                .end(function(err, res){
-                    console.log("update after");
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                     var resTask = res.body.task;
                     var appData = _this.state.data;
@@ -271,7 +273,7 @@ module.exports = React.createClass({
         var _this = this;
         Request.del( Define.api_host + "/api/task/" + id)
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                 });
 
@@ -288,7 +290,7 @@ module.exports = React.createClass({
         var _this = this;
         Request.put( Define.api_host + "/api/task/done/" + id)
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                });
 
@@ -304,7 +306,7 @@ module.exports = React.createClass({
         var _this = this;
         Request.put( Define.api_host + "/api/task/active/" + id)
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                });   
         
@@ -321,11 +323,12 @@ module.exports = React.createClass({
             task = this.state.data.tasks[beforeid];
             if(!task || task.date != taskDate) return;
         }
-
+    
+        var _this = this;
         Request.put( Define.api_host + "/api/task/order/" + id)
                .send({ type: "date", before:beforeid })
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
         });     
 
@@ -342,10 +345,11 @@ module.exports = React.createClass({
             task = this.state.data.tasks[beforeid];
             if(!task || task.folderid != taskFolder) return;
         }
+        var _this = this;
         Request.put( Define.api_host + "/api/task/order/" + id)
                .send({ type: "folder", before:beforeid })
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
         });     
 
@@ -360,6 +364,7 @@ module.exports = React.createClass({
         Request.post( Define.api_host + "/api/folder")
                .send({ name: data.name })
                .end(function(err, res){
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                     var appData = _this.state.data;
                     _this.refreshFolderAdd( appData.folders , res.body );
@@ -374,6 +379,7 @@ module.exports = React.createClass({
         Request.put( Define.api_host + "/api/folder/" + id)
                .send({ name: data.name })
                .end(function(err, res){
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
                     var appData = _this.state.data;
                     _this.refreshFolderUpdate( appData, res.body );
@@ -387,11 +393,12 @@ module.exports = React.createClass({
         var _this = this;
         Request.del( Define.api_host + "/api/folder/" + id)
                .end(function(err, res){
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
-                    var appData = _this.state.data;
-                    _this.refreshFolderDelete( appData, id );
-                    _this.setState( {data:appData} );
                 });   
+        var appData = this.state.data;
+        this.refreshFolderDelete( appData, id );
+        this.setState( {data:appData} );
     },
     folderOrder: function( id, beforeid ){
         var folder = this.getFolderInfo(this.state.data.folders, id);
@@ -400,10 +407,11 @@ module.exports = React.createClass({
             folder = this.getFolderInfo(this.state.data.folders, beforeid);
             if(!folder) return;
         }
+        var _this = this;
         Request.put( Define.api_host + "/api/folder/order/" + id)
                .send({ before:beforeid })
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res.body);
         });     
 
@@ -454,6 +462,7 @@ module.exports = React.createClass({
     refreshTaskDelete:function( appData, task ){
         //tasks から削除
         appData.tasks[task.taskid] = null;
+        delete appData.tasks[task.taskid] ;
         //関連している日付及びフォルダから削除
         var d = this.getDateInfo( appData.days, task.date );
         console.log("days id");
@@ -704,14 +713,9 @@ module.exports = React.createClass({
                 </div>
             );
         }else{ 
-            var state = {type:"day", id:"today"};
-            var params = this.getParams();
-            if( params.type ) state.type = params.type;
-            if( params.id ) state.id = params.id;
-
             return (
                 <div className="content" >
-                    <ContentMenu state={state}
+                    <ContentMenu 
                         reset={this.state.reset}
                         drag={this.state.taskdragging}
                         days={this.state.data.days}
@@ -721,28 +725,29 @@ module.exports = React.createClass({
                         folderDelete={this.folderDelete}
                         folderOrder={this.folderOrder}
                     />
-                    <ContentMain state={state}
-                        reset={this.state.reset}
-                        drag={this.state.taskdragging}
-                        days={this.state.data.days}
-                        folders={this.state.data.folders}
-                        tasks={this.state.data.tasks}
-                        taskAdd={this.taskAdd}
-                        taskUpdate={this.taskUpdate}
-                        taskDelete={this.taskDelete}
-                        taskActive={this.taskActive}
-                        taskDone={this.taskDone}
-                        taskOrderForDate={this.taskOrderForDate}
-                        taskOrderForFolder={this.taskOrderForFolder}
-                        taskDrag={this.taskDrag}
-                        taskDrop={this.taskDrop}
-                    />
+                    <div className="content-main">
+                        <div className="content-main-inner">
+                            <RouteHandler 
+                                reset={this.state.reset}
+                                drag={this.state.taskdragging}
+                                days={this.state.data.days}
+                                folders={this.state.data.folders}
+                                tasks={this.state.data.tasks}
+                                taskAdd={this.taskAdd}
+                                taskUpdate={this.taskUpdate}
+                                taskDelete={this.taskDelete}
+                                taskActive={this.taskActive}
+                                taskDone={this.taskDone}
+                                taskOrderForDate={this.taskOrderForDate}
+                                taskOrderForFolder={this.taskOrderForFolder}
+                                taskDrag={this.taskDrag}
+                                taskDrop={this.taskDrop}
+                            />
+                        </div>
+                    </div>
                 </div>        
             ) 
         }
     }
 });
-
-
-
 

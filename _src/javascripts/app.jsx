@@ -18,10 +18,17 @@ var App =  React.createClass({
 });
 
 // Router
+var ContentMainRouteDate     = require("./routes/_app_content_main_date.jsx");
+var ContentMainRouteFolder   = require("./routes/_app_content_main_folder.jsx");
+var ContentMainRoutePast     = require("./routes/_app_content_main_past.jsx");
+var ContentMainRouteKeyword  = require("./routes/_app_content_main_keyword.jsx");
 var routes = (
-    <Route handler={App} >
-        <Route name="app" path="/"  />
-        <Route name="list" path="list/:type/:id"  />
+    <Route name="app" path="/" handler={App} >
+        <Route name="folder" path="folder/:id" handler={ContentMainRouteFolder}/>
+        <Route name="past" path="date/past" handler={ContentMainRoutePast} />
+        <Route name="date" path="date/:id" handler={ContentMainRouteDate} />
+        <Route name="keyword" path="keyword" handler={ContentMainRouteKeyword} />
+        <Route path="*" handler={ContentMainRouteDate} />
     </Route>
 );
 

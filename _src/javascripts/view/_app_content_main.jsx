@@ -133,13 +133,24 @@ module.exports = React.createClass({
         return (
             <div className="content-main">
                 <div className="content-main-inner">
-                    <div className="menu-title" >
-                        <p>{title}</p>
-                    </div>
-                    {listNode}
-               </div>
+                    <RouteHandler 
+                        drag={this.props.drag}
+                        tasks={this.props.tasks}
+                        folders={this.props.folders}
+                        days={this.props.days}
+                        taskAdd={this.props.taskAdd}
+                        taskUpdate={this.props.taskUpdate}
+                        taskDelete={this.props.taskDelete}
+                        taskActive={this.props.taskActive}
+                        taskDone={this.props.taskDone}
+                        taskOrderForDate={this.props.taskOrderForDate}
+                        taskOrderForFolder={this.props.taskOrderForFolder}
+                        taskDrag={this.props.taskDrag}
+                        taskDrop={this.props.taskDrop}
+                    />
+                </div>
             </div>
-        )
+        );
     }
 });
 

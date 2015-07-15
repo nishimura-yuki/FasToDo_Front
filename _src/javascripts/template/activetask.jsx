@@ -136,6 +136,7 @@ module.exports = React.createClass({
     },
     _onDragEnd: function(event){
         console.log("drag end");
+        event.preventDefault();
         this.props.onDragEnd();
     },
     _onOverBefore: function(event){
@@ -215,7 +216,7 @@ module.exports = React.createClass({
 
         var folders = this.props.folders.map(function (f) {
             return (
-                <option value={f.folderid}>{f.name}</option>
+                <option key={"option-"+f.folderid} value={f.folderid}>{f.name}</option>
             );
         });
 
@@ -254,6 +255,7 @@ module.exports = React.createClass({
                                 <div className="activetask-info-input_title" >
                                     <input className={"task-title-input "+errorTitle} type="text" 
                                            onChange={this._onChangeTitle} value={this.state.title}
+                                           maxLength="255"
                                     />
                                 </div>
                                 <div className="activetask-info-input_date" >
@@ -263,6 +265,7 @@ module.exports = React.createClass({
                                         onFocus={this._onFocusDate}
                                         onBlur={this._onBlurDate}
                                         placeholder="yyyy/mm/dd" value={this.state.date} 
+                                        maxLength="10"
                                     />
                                 </div>
                                 <div className="activetask-info-input_folder" >

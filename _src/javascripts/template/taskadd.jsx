@@ -42,8 +42,8 @@ module.exports = React.createClass({
             this.setState({showtype: "show", error:null});
         } 
     },
-    _onSave: function(){
 
+    addTask: function(keep){
         var title  = this.state.title ? this.state.title.trim()  : "";
         var date   = this.state.date  ? this.state.date.trim()   : "";
         var folder = this.state.folder? this.state.folder.trim() : null;
@@ -53,14 +53,25 @@ module.exports = React.createClass({
             return; 
         }
 
+        if(!keep){
+            this.setState({showtype: "show", error:null});
+        }
         this.props.add(
             {title: title, 
              date: date,
              folderid: folder
             } 
-        );
-        
+        );   
     },
+    _onSave: function(event){
+        this.addTask(false); 
+    },
+    _onKeypress: function(event){
+        if(event.key === "Enter"){
+            this.addTask(true); 
+        } 
+    },
+
     _onChangeTitle:function(event){
         this.setState({ title: event.target.value });
     },
@@ -138,7 +149,7 @@ module.exports = React.createClass({
         
         var folders = this.props.folders.map(function (f) {
             return (
-                <option value={f.folderid}>{f.name}</option>
+                <option key={"option-"+f.folderid} value={f.folderid}>{f.name}</option>
             );
         });
 
@@ -164,8 +175,10 @@ module.exports = React.createClass({
                     <div className={classnameInfo} >
                         <div className="task-add-input-info_title" > 
                             <input className={"task-title-input "+errorTitle} type="text" name="title" 
+                                onKeyPress={this._onKeypress}
                                 onChange={this._onChangeTitle} 
                                 value={this.state.title} 
+                                maxLength="255"
                             />
                         </div>
                         <div className="task-add-input-info_date" >
@@ -175,6 +188,7 @@ module.exports = React.createClass({
                                 onFocus={this._onFocusDate}
                                 onBlur={this._onBlurDate}
                                 placeholder="yyyy/mm/dd" value={this.state.date} 
+                                maxLength="10"
                             />
                         </div>
                         <div className="task-add-input-info_folder" >
@@ -186,7 +200,11 @@ module.exports = React.createClass({
                             </select>
                         </div>
                         <div className="task-add-input-info_buttons">
-                            <button className="task-save-button" type="button" name="save" onClick={this._onSave} >{Messages.get("app").save}</button>
+                            <button className="task-save-button" type="button" 
+                                    name="save" onClick={this._onSave} 
+                            >
+                                {Messages.get("app").save}
+                            </button>
                         </div>            
                     </div>
                     <div className="both task-add-input_error">

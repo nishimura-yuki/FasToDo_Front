@@ -39,12 +39,18 @@
         "not_found":"ページが見つかりません",
         "language":"言語",
         "timezone":"タイムゾーン",
+        "keyword":"キーワード",
         "settings":"設定",
-        "logout":"ログアウト"
+        "logout":"ログアウト",
+        "confirm": "確認"
     },
 
 
     "error":{
+        "message": {
+            "reload": "ページを再読み込みします",
+            "internal":"予期せぬエラーが発生しました" 
+        },
         "required":"%s は必須入力です",
         "already_exist":"すでに同じメールアドレスが登録されています",
         "login_invalid":"ログイン情報が正しくありません",

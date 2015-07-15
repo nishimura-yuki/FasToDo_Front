@@ -4,22 +4,31 @@ var DateCalculator = require("./../common/DateCalculator.js");
 var Popup = require("./../component/popup.jsx");
 var Language = require("./../template/language.jsx");
 var Timezone = require("./../template/timezone.jsx");
+var Validator = require("./../common/Validator.js");
 
 // Header
 module.exports = React.createClass({
+    mixins: [ReactRouter.Navigation],
     propTypes: {
         user: React.PropTypes.object.isRequired ,
         changeDate: React.PropTypes.func.isRequired,
-        updateUserSettings: React.PropTypes.func.isRequired
+        updateUserSettings: React.PropTypes.func.isRequired,
+        onError: React.PropTypes.func.isRequired,
+        reset: React.PropTypes.bool
     },
     _init_state:{
-        show_settings: "close" 
+        show_settings: "close",
+        search_word: ""
     },
     getInitialState: function(){
         return this._init_state; 
     } , 
     componentWillReceiveProps:function(newProps){
-        this.setState( this._init_state ); 
+        var s = this._init_state;
+        if(!newProps.reset){
+            s.search_word = this.state.search_word;
+        }
+        this.setState( s ); 
     },
     _changeDate: function(){
         this.props.changeDate();
@@ -37,7 +46,7 @@ module.exports = React.createClass({
         Request.put( Define.api_host + "/api/user/settings")
                .send({ language: data.language, timezone:data.timezone })
                .end(function(err, res){
-                    console.log(err);
+                    if(err) return _this.props.onError(err);
                     console.log(res);
                     _this.props.updateUserSettings( res.body );
                });
@@ -53,6 +62,13 @@ module.exports = React.createClass({
     _onLogout:function(){
     
     },
+    _onChangeSearch: function(event){
+        var value = event.target.value;
+        if( Validator.isNotBlank( value ) ){
+            this.transitionTo('keyword', {}, {k: value});
+        }
+        this.setState({ search_word: event.target.value });
+    },
 
     render: function() {
         var iconClass = "";
@@ -67,7 +83,11 @@ module.exports = React.createClass({
                     <div className="header-info_unit1">
                         <div className="header-info-unit1_search">
                             <img src="/images/search-icon.png" alt=""/>
-                            <input className="search-text-input" type="text" name="search" />
+                            <input className="search-text-input" type="text" name="search" maxLength="25"
+                                placeholder={Messages.get("app").keyword}
+                                onChange={this._onChangeSearch} 
+                                value={this.state.search_word}
+                            />
                         </div>
                         <div className="header-info-unit1_userid">
                             {this.props.user.userid}
@@ -190,7 +210,6 @@ var SettingsPopup = React.createClass({
     },
 
     render: function(){
-        console.log(this.props.parent);
         var element = document.getElementById(this.props.parent);
         var baseTop = 0;
         var baseLeft = 0;

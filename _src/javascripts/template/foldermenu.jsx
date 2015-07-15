@@ -34,6 +34,7 @@ module.exports = React.createClass({
     },
     _onDragEnd:function(event){
         console.log("onDragEnd");
+        event.preventDefault();
         this.props.onDragEnd();
     },
 
@@ -87,7 +88,7 @@ module.exports = React.createClass({
                     </div>
                     <div className="folder-menu_section">
                         <div className="folder-menu-section_link">
-                            <Link to="list" params={{type: "folder", id: this.props.data.folderid}}>
+                            <Link to="folder" params={{id: this.props.data.folderid}}>
                                 <img src="/images/folder-icon.png" alt=""/>
                                 <div className="folder-menu-section-link_name">
                                     {this.props.data.name}

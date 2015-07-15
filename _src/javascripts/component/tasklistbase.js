@@ -17,7 +17,6 @@ module.exports = {
 
     },
     getInitialState: function(){
-        console.log("init!!");
         var s = {
             tasks: [],
             timer: null
@@ -80,6 +79,7 @@ module.exports = {
     },
     _onDrop: function(event){
         console.log("on drop area");
+        event.preventDefault();        
         if(this.state.timer){
             clearTimeout(this.state.timer);
             this.setState({timer:null});

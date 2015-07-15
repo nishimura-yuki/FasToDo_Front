@@ -53,13 +53,13 @@ var DayMenus = React.createClass({
      render: function(){
         return (
             <div className="day-menus">
-                <DayMenu key="today" id="today" count={this.props.data.today.count}
+                <DayMenu key="today" link="date" id="today" count={this.props.data.today.count}
                       image="/images/arrow-icon.png" name={Messages.get("app").today} />    
-                <DayMenu key="tomorrow" id="tomorrow" count={this.props.data.tomorrow.count}
+                <DayMenu key="tomorrow" link="date" id="tomorrow" count={this.props.data.tomorrow.count}
                       image="/images/arrow-icon.png" name={Messages.get("app").tomorrow} />    
-                <DayMenu key="anytime" id="anytime" count={this.props.data.anytime.count}
+                <DayMenu key="anytime" link="date" id="anytime" count={this.props.data.anytime.count}
                       image="/images/arrow-icon.png" name={Messages.get("app").anytime} />    
-                <DayMenu key="past" id="past" count={this.props.data.past.count}
+                <DayMenu key="past" link="past" id="past" count={this.props.data.past.count}
                       image="/images/stock-icon.png" name={Messages.get("app").past} lastline={true} />   
             </div>
         )
@@ -81,7 +81,8 @@ var FolderMenus = React.createClass({
         target_id:null,
         edit_type:null,
         folders: [],
-        timer: null
+        timer: null,
+        add_state: "close"
     },
     getInitialState: function () {
         var s = this._init_state;
@@ -96,6 +97,10 @@ var FolderMenus = React.createClass({
         this.setState({edit_type:null, target_id:null});
     },
 
+    _folderAdd: function(data){
+        this.setState({add_state: "close"});
+        this.props.folderAdd(data); 
+    },
     _folderUpdate:function( id, data ){
         this.props.folderUpdate( id, data ); 
         this.resetEdit();
@@ -164,6 +169,7 @@ var FolderMenus = React.createClass({
     },
     _onDrop:function(event){
         console.log("drop!!"); 
+        event.preventDefault();        
         if(this.state.timer){
             clearTimeout(this.state.timer);
             this.setState({timer:null});
@@ -233,6 +239,15 @@ var FolderMenus = React.createClass({
         return folders;
     },
 
+    changeAddState:function(){
+        this.resetEdit();
+        if(this.state.add_state == "close"){
+            this.setState({add_state: "open"}); 
+        }else{
+            this.setState({add_state: "close"}); 
+        }
+    },
+
     render: function(){
        
         var dragClass = "";
@@ -261,8 +276,10 @@ var FolderMenus = React.createClass({
 
         return (
             <div className="foldermenus">
-                <FolderAdd add={this.props.folderAdd}
+                <FolderAdd add={this._folderAdd}
+                    show={this.state.add_state}
                     folders={this.props.folders} 
+                    changeShowtype={this.changeAddState}
                 />
                 <div className={"foldermenus_list "+dragClass}
                     onDragOver={this._onDragOver} onDrop={this._onDrop} >
@@ -279,10 +296,10 @@ var FolderAdd = React.createClass({
      propTypes: {
         add: React.PropTypes.func.isRequired ,
         folders: React.PropTypes.array.isRequired,
-        reset: React.PropTypes.bool
+        show: React.PropTypes.string.isRequired,
+        changeShowtype: React.PropTypes.func.isRequired
      },
      _init_state: { 
-        showtype: "show" ,
         name: "" ,
         error: null
      },
@@ -290,23 +307,20 @@ var FolderAdd = React.createClass({
         return this._init_state;
      }, 
      componentWillReceiveProps: function(newProps){
-        var s = this._init_state;
-        if(!newProps.reset){
-            s.showtype = this.state.showtype;
+        var s = JSON.parse( JSON.stringify(this._init_state));
+        if(newProps.show == "open"){
+            s.error = this.state.error; 
+            s.name = this.state.name;
         }
         this.setState( s ); 
      },
      _onClickAdd: function(e){
         e.preventDefault();
-        if(this.state.showtype != "add"){
-            this.setState({showtype: "add"});
-        } 
+        this.props.changeShowtype();
      },
      _onClickCancel: function(e){
          e.preventDefault();
-         if(this.state.showtype != "show"){
-             this.setState({showtype: "show", error:null});
-         } 
+         this.props.changeShowtype();
      },
      _onSave: function(){
          
@@ -326,7 +340,7 @@ var FolderAdd = React.createClass({
              return;
          } 
          this.props.add({name: this.state.name });
-         this.setState({error:null, showtype:"show"}); 
+         this.setState({error:null}); 
      },
      _onChangeName:function(event){
          this.setState({ name: event.target.value });
@@ -336,7 +350,7 @@ var FolderAdd = React.createClass({
         var addHidden = "";
         var open = "";
         var errorMessage = "";
-        if(this.state.showtype == "add"){
+        if(this.props.show == "open"){
             open = "folder-add-open";
             addHidden = "hidden"; 
             if(this.state.error){
@@ -367,6 +381,7 @@ var FolderAdd = React.createClass({
                                 <input className="folder-name-input" type="text" name="name" 
                                     onChange={this._onChangeName} 
                                     value={this.state.name} 
+                                    maxLength="255"
                                 />
                             </div>
                             <div className="folder-add-input-info_button">
@@ -453,6 +468,7 @@ var FolderEditPopup = React.createClass({
                                 <input className="folder-name-input" type="text" name="name" 
                                     onChange={this._onChangeName} 
                                     value={this.state.name} 
+                                    maxLength="255"
                                 />
                             </div>                         
                         </div>
