@@ -49,8 +49,8 @@ var c = {
         webpack: {
             entry: {
                 app: src + '/javascripts/app.jsx',
-              //  signup: src + '/javascripts/signup.jsx',
-              //  login: src + '/javascripts/login.jsx'
+                signup: src + '/javascripts/signup.jsx',
+                login: src + '/javascripts/login.jsx'
             },
             output: {
                 filename: "[name].js"
